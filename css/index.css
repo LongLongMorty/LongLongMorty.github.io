@@ -1752,7 +1752,7 @@ body {
   background: var(--global-bg);
   color: var(--font-color);
   font-size: var(--global-font-size);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Lato, Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: Segoe UI, "Microsoft YaHei", sans-serif;
   line-height: 2;
   -webkit-tap-highlight-color: rgba(0,0,0,0);
   scroll-behavior: smooth;
@@ -2039,7 +2039,7 @@ figure.highlight pre .javascript .function {
 .container pre,
 .container code {
   font-size: var(--global-font-size);
-  font-family: consolas, Menlo, monospace, 'PingFang SC', 'Microsoft YaHei', sans-serif !important;
+  font-family: Consolas, "Courier New", monospace !important;
   border-radius: 6px;
 }
 .container code {
@@ -5033,6 +5033,37 @@ figure.highlight pre .javascript .function {
   font-family: Monaco, 'Ubuntu Mono', monospace;
   line-height: 1em;
   border-radius: 3px;
+}
+.container h1,
+.container h2,
+.container h3,
+.container h4,
+.container h5,
+.container h6 {
+  width: fit-content;
+}
+.container h1 a:not(.headerlink),
+.container h2 a:not(.headerlink),
+.container h3 a:not(.headerlink),
+.container h4 a:not(.headerlink),
+.container h5 a:not(.headerlink),
+.container h6 a:not(.headerlink) {
+  position: relative;
+  z-index: 10;
+}
+.container h1 a.headerlink,
+.container h2 a.headerlink,
+.container h3 a.headerlink,
+.container h4 a.headerlink,
+.container h5 a.headerlink,
+.container h6 a.headerlink {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 .container ol ol,
 .container ul ol,

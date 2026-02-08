@@ -1,0 +1,379 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>集群与分布式理论 | LongMorty</title><meta name="author" content="LongMorty"><meta name="copyright" content="LongMorty"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="分布式和集群知识学习。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="集群与分布式理论">
+<meta property="og:url" content="https://longlongmorty.github.io/2026/02/08/%E9%9B%86%E7%BE%A4%E4%B8%8E%E5%88%86%E5%B8%83%E5%BC%8F%E7%90%86%E8%AE%BA/index.html">
+<meta property="og:site_name" content="LongMorty">
+<meta property="og:description" content="分布式和集群知识学习。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260208173600455.png">
+<meta property="article:published_time" content="2026-02-08T09:16:50.000Z">
+<meta property="article:modified_time" content="2026-02-08T09:43:22.798Z">
+<meta property="article:author" content="LongMorty">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="集群">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260208173600455.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "集群与分布式理论",
+  "url": "https://longlongmorty.github.io/2026/02/08/%E9%9B%86%E7%BE%A4%E4%B8%8E%E5%88%86%E5%B8%83%E5%BC%8F%E7%90%86%E8%AE%BA/",
+  "image": "https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260208173600455.png",
+  "datePublished": "2026-02-08T09:16:50.000Z",
+  "dateModified": "2026-02-08T09:43:22.798Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "LongMorty",
+      "url": "https://LongLongMorty.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png"><link rel="canonical" href="https://longlongmorty.github.io/2026/02/08/%E9%9B%86%E7%BE%A4%E4%B8%8E%E5%88%86%E5%B8%83%E5%BC%8F%E7%90%86%E8%AE%BA/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '集群与分布式理论',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260208173600455.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">LongMorty</span></a><a class="nav-page-title" href="/"><span class="site-name">集群与分布式理论</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">集群与分布式理论</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-02-08T09:16:50.000Z" title="发表于 2026-02-08 17:16:50">2026-02-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-02-08T09:43:22.798Z" title="更新于 2026-02-08 17:43:22">2026-02-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%90%86%E8%AE%BA%E7%9F%A5%E8%AF%86/">理论知识</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近想学习一些项目，发现都需要分布式知识，于是我找了一些资料学习。</p>
+<p>**集群（Cluster）<strong>和</strong>分布式（Distributed）**就像是”人多力量大”的两种不同组织形式。虽然它们都涉及多台服务器，但出发点和解决问题的方式完全不同。</p>
+<h2 id="集群"><a href="#集群" class="headerlink" title="集群"></a>集群</h2><p>集群就像是**”多胞胎”<strong>。多台服务器物理上连接在一起，对外表现得像一台服务器。每台服务器运行的服务基本上是</strong>一模一样**的。</p>
+<ul>
+<li><strong>核心目的：</strong> 高可用（HA）和负载均衡（Load Balancing）</li>
+<li><strong>工作方式：</strong> 当一个请求进来时，集群里的任何一台机器都能处理它。如果其中一台倒下了，另一台立刻顶上</li>
+<li><strong>打个比方：</strong> 一家餐厅雇了 5 个厨师，每个厨师都会做全菜单的所有菜。客人来了，谁有空谁炒；一个厨师生病了，餐厅照样营业</li>
+</ul>
+<h3 id="集群应用示例"><a href="#集群应用示例" class="headerlink" title="集群应用示例"></a>集群应用示例</h3><p>以一个支持千万用户同时在线的聊天应用为例：</p>
+<p>在聊天场景下，集群意味着你部署了 <strong>100 台一模一样的”聊天连接服务器”</strong>。</p>
+<ul>
+<li><strong>场景：</strong> 周五晚上，大家都上线聊天。如果只有一台服务器，它会因为连接数太多（CPU&#x2F;内存爆满）直接宕机</li>
+<li><strong>做法：</strong> 你弄一个”负载均衡器”（Load Balancer）放在最前面。用户 A 接入 1 号服务器，用户 B 接入 2 号服务器</li>
+<li><strong>集群的威力：</strong> 即使 1 号服务器突然断电了，用户 A 只需要重新连接一下，负载均衡器就会把他分配到 2 号服务器。<strong>对用户来说，服务永远在线</strong></li>
+</ul>
+<h2 id="分布式"><a href="#分布式" class="headerlink" title="分布式"></a>分布式</h2><p>分布式就像是**”流水线”**。它把一个庞大、复杂的业务拆分成多个小部分（微服务），分别部署在不同的服务器上。</p>
+<ul>
+<li><strong>核心目的：</strong> 提高效率、解决单台机器性能上限（横向扩展）</li>
+<li><strong>工作方式：</strong> 一个请求进来，可能需要 A 服务器算一下，B 服务器存一下，C 服务器发个通知，大家分工明确</li>
+<li><strong>打个比方：</strong> 还是那家餐厅，现在规模大了。我们搞分工：有人专门切菜，有人专门炒菜，有人专门洗碗。每个人只负责一件事，但合起来完成一份订单</li>
+</ul>
+<h3 id="分布式应用示例"><a href="#分布式应用示例" class="headerlink" title="分布式应用示例"></a>分布式应用示例</h3><p>依旧以聊天软件为例，随着聊天软件变复杂，你发现一台服务器如果又要处理”发消息”，又要处理”文件传输”，还要处理”朋友圈视频渲染”，这台机器的性能会被榨干。</p>
+<p><strong>做法：</strong> 你把功能拆开，部署在不同的机器上：</p>
+<ul>
+<li><strong>服务 A (存储服务)：</strong> 专门负责把聊天记录存进数据库</li>
+<li><strong>服务 B (推送服务)：</strong> 专门负责给手机发送”叮咚”的消息提醒</li>
+<li><strong>服务 C (图片处理)：</strong> 专门负责把你发的原图压缩成缩略图</li>
+</ul>
+<p><strong>分布式的威力：</strong> 当某天大家都在疯狂发朋友圈视频，只有”图片&#x2F;视频处理服务”会很忙。你只需要给这个模块增加资源，而不影响别人发文字消息。</p>
+<h3 id="集群-vs-分布式对比"><a href="#集群-vs-分布式对比" class="headerlink" title="集群 vs 分布式对比"></a>集群 vs 分布式对比</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>集群 (Cluster)</th>
+<th>分布式 (Distributed)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>功能描述</strong></td>
+<td>相同的事，多个人做</td>
+<td>不同的事，分摊着做</td>
+</tr>
+<tr>
+<td><strong>关系</strong></td>
+<td>纵向叠加（复制）</td>
+<td>横向拆解（协作）</td>
+</tr>
+<tr>
+<td><strong>主要目标</strong></td>
+<td><strong>可靠性</strong>（怕一台挂了）</td>
+<td><strong>性能</strong>（怕一台忙不过来）</td>
+</tr>
+<tr>
+<td><strong>耦合度</strong></td>
+<td>耦合度高，通常在局域网内</td>
+<td>耦合度低，可以跨地域、跨网络</td>
+</tr>
+</tbody></table>
+<h2 id="终极形态：分布式集群"><a href="#终极形态：分布式集群" class="headerlink" title="终极形态：分布式集群"></a>终极形态：分布式集群</h2><p>在真实的聊天架构中，这两者是<strong>结合</strong>使用的：</p>
+<ol>
+<li><p><strong>分布式：</strong> 你把系统拆成了”消息服务”、”用户资料服务”、”支付服务”</p>
+</li>
+<li><p><strong>集群：</strong></p>
+<ul>
+<li>为了防止消息丢了，你搞了 10 台机器组成”消息服务集群”</li>
+<li>为了防止支付出错，你搞了 5 台机器组成”支付服务集群”</li>
+</ul>
+</li>
+</ol>
+<h2 id="分布式不同模块（跨服务器）调用"><a href="#分布式不同模块（跨服务器）调用" class="headerlink" title="分布式不同模块（跨服务器）调用"></a>分布式不同模块（跨服务器）调用</h2><p>当服务 A 和服务 B 运行在不同的物理机器上时，它们必须通过<strong>网络协议</strong>进行通信。</p>
+<h3 id="①-同步调用：RPC-远程过程调用"><a href="#①-同步调用：RPC-远程过程调用" class="headerlink" title="① 同步调用：RPC (远程过程调用)"></a>① 同步调用：RPC (远程过程调用)</h3><p>这是最常见的方式，让调用远程服务就像调用本地函数一样简单。</p>
+<ul>
+<li><strong>常用框架：</strong> gRPC, Dubbo, Spring Cloud OpenFeign</li>
+<li><strong>逻辑：</strong> A 发起请求 → 挂起等待 → B 处理完返回结果 → A 继续执行</li>
+<li><strong>特点：</strong> 响应快，但如果 B 挂了，A 也会跟着卡死</li>
+</ul>
+<h3 id="②-异步调用：消息队列-MQ"><a href="#②-异步调用：消息队列-MQ" class="headerlink" title="② 异步调用：消息队列 (MQ)"></a>② 异步调用：消息队列 (MQ)</h3><p>如果不要求立刻拿到结果，就用”发邮件”的方式。</p>
+<ul>
+<li><strong>常用工具：</strong> RabbitMQ, Kafka, RocketMQ</li>
+<li><strong>逻辑：</strong> A 把消息丢进队列 → A 直接去忙别的了 → B 有空了自己去队列取</li>
+<li><strong>特点：</strong> 解耦、削峰填谷。比如聊天服务器里，发消息是实时的，但”存储聊天记录”可以通过 MQ 异步完成</li>
+</ul>
+<h2 id="同一模块不同进程调用"><a href="#同一模块不同进程调用" class="headerlink" title="同一模块不同进程调用"></a>同一模块不同进程调用</h2><p>这种情况通常发生在一台性能很强的机器上（比如 64 核 CPU），为了充分利用资源，你开了多个相同的进程。这属于 <strong>IPC（进程间通信）</strong> 的范畴。</p>
+<h3 id="①-最简单：走网络回环-Loopback"><a href="#①-最简单：走网络回环-Loopback" class="headerlink" title="① 最简单：走网络回环 (Loopback)"></a>① 最简单：走网络回环 (Loopback)</h3><p>即使在同一台机器上，也可以假装它们在不同机器。</p>
+<ul>
+<li><strong>方式：</strong> 依然使用 HTTP 或 RPC，但 IP 地址写 <code>127.0.0.1</code></li>
+<li><strong>优点：</strong> 代码统一，不需要为”单机”和”分布式”写两套逻辑</li>
+</ul>
+<h3 id="②-最快速：共享内存-Shared-Memory"><a href="#②-最快速：共享内存-Shared-Memory" class="headerlink" title="② 最快速：共享内存 (Shared Memory)"></a>② 最快速：共享内存 (Shared Memory)</h3><ul>
+<li><strong>逻辑：</strong> 操作系统开辟一块内存区域，进程 A 往里写，进程 B 直接从里面读</li>
+<li><strong>特点：</strong> 速度极快，不需要经过网卡，但需要处理”抢占”问题（加锁）</li>
+</ul>
+<h3 id="③-最标准：Unix-Domain-Socket-UDS"><a href="#③-最标准：Unix-Domain-Socket-UDS" class="headerlink" title="③ 最标准：Unix Domain Socket (UDS)"></a>③ 最标准：Unix Domain Socket (UDS)</h3><ul>
+<li><strong>逻辑：</strong> 在 Linux 系统里，这类似于一种特殊的”文件”</li>
+<li><strong>特点：</strong> 比网络协议（TCP&#x2F;IP）快得多，因为它省去了打包&#x2F;拆包 IP 包头的性能损耗。数据库（如 MySQL）和 Web 服务器（如 Nginx）在本机通信时常用这个</li>
+</ul>
+<h3 id="进程通信示例"><a href="#进程通信示例" class="headerlink" title="进程通信示例"></a>进程通信示例</h3><p>依旧以聊天软件为例：</p>
+<ul>
+<li><strong>进程内通信：</strong> “长连接网关”为了抗住高并发，会在一台机器开 8 个进程。它们之间通过 <strong>Shared Memory</strong> 共享一份”在线用户名单”，效率最高</li>
+<li><strong>跨模块通信：</strong> “网关模块”要把消息转发给”敏感词过滤模块”。如果要求极速过滤，就走 <strong>gRPC</strong>；如果只是要把消息”备份到数据库”，就丢进 <strong>Kafka (MQ)</strong> 慢慢存</li>
+</ul>
+<h2 id="实现序列化"><a href="#实现序列化" class="headerlink" title="实现序列化"></a>实现序列化</h2><p>无论是 RPC 还是消息队列，数据都不能直接把一个 Python 对象或 Java 对象扔过去，必须先把它**”拍扁”<strong>成二进制字节流。这个过程就是</strong>序列化**。</p>
+<h3 id="1-JSON：人人都爱，但它是”大胖子”"><a href="#1-JSON：人人都爱，但它是”大胖子”" class="headerlink" title="1. JSON：人人都爱，但它是”大胖子”"></a>1. JSON：人人都爱，但它是”大胖子”</h3><p>JSON 是目前最流行的格式，因为它可读性极强，直接打开文本就能看懂。</p>
+<p><strong>缺点：</strong> 冗余信息太多。比如 <code>{&quot;userId&quot;: 12345, &quot;name&quot;: &quot;Gemini&quot;}</code></p>
+<p><strong>浪费在哪里：</strong></p>
+<ul>
+<li><strong>重复的 Key：</strong> 每次发消息都要带上 <code>&quot;userId&quot;</code> 这个字符串</li>
+<li><strong>文本编码：</strong> 数字 <code>12345</code> 在内存里只占几个字节，变成字符串后占了 5 个字节</li>
+<li><strong>解析慢：</strong> 机器读 JSON 需要逐个字符扫描、匹配括号</li>
+</ul>
+<h3 id="2-Protobuf：为了速度而生的”压缩大师”"><a href="#2-Protobuf：为了速度而生的”压缩大师”" class="headerlink" title="2. Protobuf：为了速度而生的”压缩大师”"></a>2. Protobuf：为了速度而生的”压缩大师”</h3><p><strong>Protobuf (Protocol Buffers)</strong> 是 Google 开发的一种二进制序列化协议。它不追求人能看懂，追求的是<strong>极致的体积</strong>和<strong>极致的速度</strong>。</p>
+<p><strong>它是怎么省空间的？</strong></p>
+<ul>
+<li><strong>不传 Key，只传编号：</strong> 在 Protobuf 的定义文件里，<code>userId</code> 被编号为 <code>1</code>。传输时，它只发一个编号 <code>1</code>，接收方对照表一看，就知道这是 <code>userId</code></li>
+<li><strong>Varint 编码：</strong> 这是一种变长编码。如果数字很小（比如 <code>5</code>），它只用 1 个字节存，而不是固定用 4 个或 8 个</li>
+<li><strong>二进制格式：</strong> 不需要处理引号、括号、逗号，机器读取速度极快</li>
+</ul>
+<p><strong>性能对比：</strong></p>
+<p>在一台普通的聊天服务器上：</p>
+<ul>
+<li><strong>体积：</strong> Protobuf 通常只有 JSON 的 <strong>1&#x2F;3 到 1&#x2F;10</strong></li>
+<li><strong>速度：</strong> 序列化和反序列化的速度，Protobuf 通常比 JSON 快 <strong>5 到 10 倍</strong></li>
+</ul>
+<blockquote>
+<p><strong>小比喻：</strong> JSON 就像是带包装的<strong>快递盒</strong>，里面有填充泡沫、说明书、精美外壳；Protobuf 就像是<strong>压缩真空包</strong>，抽干了所有空气，只剩下最核心的干货</p>
+</blockquote>
+<h3 id="3-在聊天服务器里的实际应用"><a href="#3-在聊天服务器里的实际应用" class="headerlink" title="3. 在聊天服务器里的实际应用"></a>3. 在聊天服务器里的实际应用</h3><p>假设聊天系统每秒有 100 万条消息：</p>
+<ul>
+<li><strong>如果用 JSON：</strong> 带宽成本可能是每月 10 万元，服务器 CPU 每天忙着解析字符串</li>
+<li><strong>如果用 Protobuf：</strong> 带宽减半，服务器 CPU 占用率大幅下降，响应延迟（Latency）从 50ms 降到 10ms</li>
+</ul>
+<p>这就是为什么像 <strong>gRPC</strong> 默认就使用 Protobuf 作为通信协议的原因。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://LongLongMorty.github.io">LongMorty</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://longlongmorty.github.io/2026/02/08/%E9%9B%86%E7%BE%A4%E4%B8%8E%E5%88%86%E5%B8%83%E5%BC%8F%E7%90%86%E8%AE%BA/">https://longlongmorty.github.io/2026/02/08/%E9%9B%86%E7%BE%A4%E4%B8%8E%E5%88%86%E5%B8%83%E5%BC%8F%E7%90%86%E8%AE%BA/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://LongLongMorty.github.io" target="_blank">LongMorty</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a><a class="post-meta__tags" href="/tags/%E9%9B%86%E7%BE%A4/">集群</a></div><div class="post-share"><div class="social-share" data-image="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260208173600455.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/02/05/Cpp%E5%AE%9E%E7%8E%B0%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" title="Cpp实现单例模式"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/%E5%8D%95%E4%BE%8B%E7%B1%BB%E9%9D%99%E6%80%81%E6%88%90%E5%91%98%E5%88%9D%E5%A7%8B%E5%8C%96%E9%97%AE%E9%A2%98.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Cpp实现单例模式</div></div><div class="info-2"><div class="info-item-1">介绍了设计模式中最常见的单例模式</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">LongMorty</div><div class="author-info-description">Morty's Blog</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/LongLongMorty"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/LongLongMorty" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:2134693323@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4"><span class="toc-number">2.</span> <span class="toc-text">集群</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4%E5%BA%94%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="toc-number">2.1.</span> <span class="toc-text">集群应用示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">分布式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E5%BA%94%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="toc-number">3.1.</span> <span class="toc-text">分布式应用示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4-vs-%E5%88%86%E5%B8%83%E5%BC%8F%E5%AF%B9%E6%AF%94"><span class="toc-number">3.2.</span> <span class="toc-text">集群 vs 分布式对比</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%88%E6%9E%81%E5%BD%A2%E6%80%81%EF%BC%9A%E5%88%86%E5%B8%83%E5%BC%8F%E9%9B%86%E7%BE%A4"><span class="toc-number">4.</span> <span class="toc-text">终极形态：分布式集群</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%8D%E5%90%8C%E6%A8%A1%E5%9D%97%EF%BC%88%E8%B7%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%EF%BC%89%E8%B0%83%E7%94%A8"><span class="toc-number">5.</span> <span class="toc-text">分布式不同模块（跨服务器）调用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%91%A0-%E5%90%8C%E6%AD%A5%E8%B0%83%E7%94%A8%EF%BC%9ARPC-%E8%BF%9C%E7%A8%8B%E8%BF%87%E7%A8%8B%E8%B0%83%E7%94%A8"><span class="toc-number">5.1.</span> <span class="toc-text">① 同步调用：RPC (远程过程调用)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%91%A1-%E5%BC%82%E6%AD%A5%E8%B0%83%E7%94%A8%EF%BC%9A%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97-MQ"><span class="toc-number">5.2.</span> <span class="toc-text">② 异步调用：消息队列 (MQ)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8C%E4%B8%80%E6%A8%A1%E5%9D%97%E4%B8%8D%E5%90%8C%E8%BF%9B%E7%A8%8B%E8%B0%83%E7%94%A8"><span class="toc-number">6.</span> <span class="toc-text">同一模块不同进程调用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%91%A0-%E6%9C%80%E7%AE%80%E5%8D%95%EF%BC%9A%E8%B5%B0%E7%BD%91%E7%BB%9C%E5%9B%9E%E7%8E%AF-Loopback"><span class="toc-number">6.1.</span> <span class="toc-text">① 最简单：走网络回环 (Loopback)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%91%A1-%E6%9C%80%E5%BF%AB%E9%80%9F%EF%BC%9A%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98-Shared-Memory"><span class="toc-number">6.2.</span> <span class="toc-text">② 最快速：共享内存 (Shared Memory)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%91%A2-%E6%9C%80%E6%A0%87%E5%87%86%EF%BC%9AUnix-Domain-Socket-UDS"><span class="toc-number">6.3.</span> <span class="toc-text">③ 最标准：Unix Domain Socket (UDS)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1%E7%A4%BA%E4%BE%8B"><span class="toc-number">6.4.</span> <span class="toc-text">进程通信示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E5%BA%8F%E5%88%97%E5%8C%96"><span class="toc-number">7.</span> <span class="toc-text">实现序列化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-JSON%EF%BC%9A%E4%BA%BA%E4%BA%BA%E9%83%BD%E7%88%B1%EF%BC%8C%E4%BD%86%E5%AE%83%E6%98%AF%E2%80%9D%E5%A4%A7%E8%83%96%E5%AD%90%E2%80%9D"><span class="toc-number">7.1.</span> <span class="toc-text">1. JSON：人人都爱，但它是”大胖子”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Protobuf%EF%BC%9A%E4%B8%BA%E4%BA%86%E9%80%9F%E5%BA%A6%E8%80%8C%E7%94%9F%E7%9A%84%E2%80%9D%E5%8E%8B%E7%BC%A9%E5%A4%A7%E5%B8%88%E2%80%9D"><span class="toc-number">7.2.</span> <span class="toc-text">2. Protobuf：为了速度而生的”压缩大师”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9C%A8%E8%81%8A%E5%A4%A9%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%87%8C%E7%9A%84%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8"><span class="toc-number">7.3.</span> <span class="toc-text">3. 在聊天服务器里的实际应用</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/02/08/%E9%9B%86%E7%BE%A4%E4%B8%8E%E5%88%86%E5%B8%83%E5%BC%8F%E7%90%86%E8%AE%BA/" title="集群与分布式理论"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260208173600455.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="集群与分布式理论"/></a><div class="content"><a class="title" href="/2026/02/08/%E9%9B%86%E7%BE%A4%E4%B8%8E%E5%88%86%E5%B8%83%E5%BC%8F%E7%90%86%E8%AE%BA/" title="集群与分布式理论">集群与分布式理论</a><time datetime="2026-02-08T09:16:50.000Z" title="发表于 2026-02-08 17:16:50">2026-02-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/02/05/Cpp%E5%AE%9E%E7%8E%B0%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" title="Cpp实现单例模式"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/%E5%8D%95%E4%BE%8B%E7%B1%BB%E9%9D%99%E6%80%81%E6%88%90%E5%91%98%E5%88%9D%E5%A7%8B%E5%8C%96%E9%97%AE%E9%A2%98.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Cpp实现单例模式"/></a><div class="content"><a class="title" href="/2026/02/05/Cpp%E5%AE%9E%E7%8E%B0%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" title="Cpp实现单例模式">Cpp实现单例模式</a><time datetime="2026-02-05T04:22:43.000Z" title="发表于 2026-02-05 12:22:43">2026-02-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/02/04/%E7%94%9F%E4%BA%A7%E8%80%85-%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%9E%8B%E5%AE%9E%E7%8E%B0/" title="生产者-消费者模型实现"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="生产者-消费者模型实现"/></a><div class="content"><a class="title" href="/2026/02/04/%E7%94%9F%E4%BA%A7%E8%80%85-%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%9E%8B%E5%AE%9E%E7%8E%B0/" title="生产者-消费者模型实现">生产者-消费者模型实现</a><time datetime="2026-02-04T11:32:39.000Z" title="发表于 2026-02-04 19:32:39">2026-02-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/02/02/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" title="严蔚敏数据结构笔记"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/yanweiming.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="严蔚敏数据结构笔记"/></a><div class="content"><a class="title" href="/2026/02/02/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" title="严蔚敏数据结构笔记">严蔚敏数据结构笔记</a><time datetime="2026-02-02T04:00:52.000Z" title="发表于 2026-02-02 12:00:52">2026-02-02</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By LongMorty</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><canvas class="fireworks" mobile="true"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      false
+        ? pjax.loadUrl('/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
