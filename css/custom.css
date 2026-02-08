@@ -1,0 +1,286 @@
+/* ========================================
+   自定义美化样式 - Custom Beautification
+   ======================================== */
+
+/* 1. 全局样式优化 */
+:root {
+  --primary-color: #0084ff;
+  --secondary-color: #667eea;
+  --accent-color: #f093fb;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+/* 2. 导航栏美化 */
+#nav {
+  background: linear-gradient(135deg, rgba(0, 132, 255, 0.95) 0%, rgba(102, 126, 234, 0.95) 100%);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+#nav .site-page a:hover {
+  color: #fff;
+  border-bottom: 2px solid #fff;
+  transition: all 0.3s ease;
+}
+
+/* 3. 首页标题和字幕美化 */
+.site-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: slideInDown 0.8s ease;
+}
+
+.site-subtitle {
+  font-size: 1.2rem;
+  color: #666;
+  margin-top: 10px;
+  animation: fadeIn 1s ease 0.3s both;
+}
+
+/* 4. 文章卡片美化 */
+.post-item {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.post-item:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.post-cover {
+  height: 200px;
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
+}
+
+.post-cover img {
+  transition: transform 0.4s ease;
+}
+
+.post-item:hover .post-cover img {
+  transform: scale(1.08);
+}
+
+/* 5. 侧边栏卡片美化 */
+.card-widget {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.card-widget:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.card-widget-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 10px;
+}
+
+/* 6. 标签美化 */
+.tag-item {
+  display: inline-block;
+  padding: 6px 14px;
+  margin: 4px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.tag-item:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 132, 255, 0.3);
+}
+
+/* 7. 按钮美化 */
+.btn {
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 132, 255, 0.3);
+}
+
+/* 8. 代码块美化 */
+pre {
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+  background: #f5f5f5;
+  padding: 16px;
+  overflow-x: auto;
+}
+
+code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9rem;
+}
+
+/* 9. 链接美化 */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+a:hover {
+  color: var(--secondary-color);
+}
+
+a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+a:hover::after {
+  width: 100%;
+}
+
+/* 10. 动画定义 */
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* 11. 响应式设计 */
+@media (max-width: 768px) {
+  .site-title {
+    font-size: 1.8rem;
+  }
+
+  .site-subtitle {
+    font-size: 1rem;
+  }
+
+  .post-item {
+    margin-bottom: 15px;
+  }
+}
+
+/* 12. 深色模式适配 */
+[data-theme="dark"] {
+  --primary-color: #0084ff;
+  --secondary-color: #667eea;
+}
+
+[data-theme="dark"] .site-title {
+  color: #fff;
+}
+
+[data-theme="dark"] .card-widget {
+  background: #2a2a2a;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .card-widget-title {
+  color: #fff;
+}
+
+/* 13. 关于页面样式 */
+.about-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+  margin: 30px 0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(0, 132, 255, 0.1), rgba(102, 126, 234, 0.1));
+  border: 1px solid rgba(0, 132, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-5px);
+  background: linear-gradient(135deg, rgba(0, 132, 255, 0.2), rgba(102, 126, 234, 0.2));
+  box-shadow: 0 8px 16px rgba(0, 132, 255, 0.15);
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+}
+
+[data-theme="dark"] .stat-item {
+  background: linear-gradient(135deg, rgba(0, 132, 255, 0.15), rgba(102, 126, 234, 0.15));
+  border-color: rgba(0, 132, 255, 0.3);
+}
+
+[data-theme="dark"] .stat-label {
+  color: #aaa;
+}
