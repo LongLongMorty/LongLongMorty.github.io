@@ -1,0 +1,278 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>GO语言 实现资料研究助手mini Agent | LongMorty</title><meta name="author" content="LongMorty"><meta name="copyright" content="LongMorty"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="一个资料研究助手demo项目，输入主题后自动搜索、筛选、总结并输出引用链接。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GO语言 实现资料研究助手mini Agent">
+<meta property="og:url" content="https://longlongmorty.github.io/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/index.html">
+<meta property="og:site_name" content="LongMorty">
+<meta property="og:description" content="一个资料研究助手demo项目，输入主题后自动搜索、筛选、总结并输出引用链接。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613221016838.png">
+<meta property="article:published_time" content="2026-06-13T14:04:23.000Z">
+<meta property="article:modified_time" content="2026-06-13T14:12:25.305Z">
+<meta property="article:author" content="LongMorty">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="GO">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613221016838.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "GO语言 实现资料研究助手mini Agent",
+  "url": "https://longlongmorty.github.io/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/",
+  "image": "https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613221016838.png",
+  "datePublished": "2026-06-13T14:04:23.000Z",
+  "dateModified": "2026-06-13T14:12:25.305Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "LongMorty",
+      "url": "https://LongLongMorty.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png"><link rel="canonical" href="https://longlongmorty.github.io/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'GO语言 实现资料研究助手mini Agent',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.1"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">10</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613221016838.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" alt="Logo"><span class="site-name">LongMorty</span></a><a class="nav-page-title" href="/"><span class="site-name">GO语言 实现资料研究助手mini Agent</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">GO语言 实现资料研究助手mini Agent</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-13T14:04:23.000Z" title="发表于 2026-06-13 22:04:23">2026-06-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-13T14:12:25.305Z" title="更新于 2026-06-13 22:12:25">2026-06-13</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Agent/">Agent</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>GO语言 实现资料研究助手mini Agent</p>
+<p>一个资料研究助手demo项目，输入主题后自动搜索、筛选、总结并输出引用链接。</p>
+<p>使用到的库主要是<code>github.com/sashabaranov/go-openai</code>，用到的模型为<code>gpt5.4-min</code>，物理联网引擎工具是<code>tavily</code>（每个月免费一千次请求）。</p>
+<p>先 定义个<code>Tavily </code>官方响应的标准 Go 结构体</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> TavilyResponse <span class="keyword">struct</span> &#123;</span><br><span class="line">	Results []<span class="keyword">struct</span> &#123;</span><br><span class="line">		Title   <span class="type">string</span> <span class="string">`json:&quot;title&quot;`</span></span><br><span class="line">		URL     <span class="type">string</span> <span class="string">`json:&quot;url&quot;`</span></span><br><span class="line">		Content <span class="type">string</span> <span class="string">`json:&quot;content&quot;`</span> <span class="comment">// 网页干净的摘要文本</span></span><br><span class="line">	&#125; <span class="string">`json:&quot;results&quot;`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>再定义符合<code>Openai</code>标准的工具</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">tools := []openai.Tool&#123;</span><br><span class="line">    &#123;</span><br><span class="line">       Type: openai.ToolTypeFunction,</span><br><span class="line">       Function: &amp;openai.FunctionDefinition&#123;</span><br><span class="line">          Name:        <span class="string">&quot;web_search&quot;</span>,</span><br><span class="line">          Description: <span class="string">&quot;当你对研究主题缺乏了解，或者需要获取最新时效性新闻、知识线索时使用。&quot;</span>,</span><br><span class="line">          Parameters: jsonschema.Definition&#123;</span><br><span class="line">             Type: jsonschema.Object,</span><br><span class="line">             Properties: <span class="keyword">map</span>[<span class="type">string</span>]jsonschema.Definition&#123;</span><br><span class="line">                <span class="string">&quot;query&quot;</span>: &#123;Type: jsonschema.String, Description: <span class="string">&quot;精准的英文或中文搜索关键词&quot;</span>&#125;,</span><br><span class="line">             &#125;,</span><br><span class="line">             Required: []<span class="type">string</span>&#123;<span class="string">&quot;query&quot;</span>&#125;,</span><br><span class="line">          &#125;,</span><br><span class="line">       &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>系统提示词给出角色和限制引用格式</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">systemPrompt := <span class="string">`你是一个拥有真实联网搜索能力的 AI 研究员。</span></span><br><span class="line"><span class="string">针对用户给出的主题，你需要自主决定是进行搜索、还是直接输出最终的总结报告。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">【引用规范】：</span></span><br><span class="line"><span class="string">当你在最后给人类输出最终的研究报告时，每一段核心事实陈述后面，必须强行标注其信息来源的 URL 链接，格式如：(来源: https://example.com/abc)。`</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>然后再加上第一层研究时间防护</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ctx, cancel := context.WithTimeout(context.Background(), <span class="number">120</span>*time.Second) <span class="comment">// 真实联网加大超时到 120 秒</span></span><br><span class="line">	<span class="keyword">defer</span> cancel()</span><br></pre></td></tr></table></figure>
+
+<p>第二层防护是一个for循环，限制最大迭代步数，避免陷入死循环</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> maxSteps = <span class="number">5</span> <span class="comment">// 只让迭代五次，一般不是太复杂的任务都够了，节约token</span></span><br><span class="line">	currentStep := <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>发起请求(为了省token选择了<code>gpt-5.4-mini</code>)</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">resp, err := client.CreateChatCompletion(ctx, openai.ChatCompletionRequest&#123;</span><br><span class="line">			Model:    <span class="string">&quot;gpt-5.4-mini&quot;</span>,</span><br><span class="line">			Messages: historyMessages,</span><br><span class="line">			Tools:    tools,</span><br><span class="line">		&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>返回结果并组成新的历史记录，并判断有没有end</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">serverMessage := resp.Choices[<span class="number">0</span>].Message</span><br><span class="line">		historyMessages = <span class="built_in">append</span>(historyMessages, serverMessage)</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 收敛条件：如果没有工具调用，说明研究结束，直接打印报告</span></span><br><span class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(serverMessage.ToolCalls) == <span class="number">0</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">&quot;\n🎉 [联网研究完成！最终交付报告] :&quot;</span>)</span><br><span class="line">			fmt.Println(<span class="string">&quot;--------------------------------------------------------------------------------&quot;</span>)</span><br><span class="line">			fmt.Println(serverMessage.Content)</span><br><span class="line">			fmt.Println(<span class="string">&quot;--------------------------------------------------------------------------------&quot;</span>)</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br></pre></td></tr></table></figure>
+
+<p>核心部分，执行工具部分</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> _, toolCall := <span class="keyword">range</span> serverMessage.ToolCalls &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;   -&gt; 🎬 [Act 行动]: 触发物理搜索引擎! 关键词: %s\n&quot;</span>, toolCall.Function.Arguments)</span><br><span class="line"></span><br><span class="line">			<span class="keyword">var</span> observation <span class="type">string</span></span><br><span class="line"></span><br><span class="line">			<span class="keyword">if</span> toolCall.Function.Name == <span class="string">&quot;web_search&quot;</span> &#123;</span><br><span class="line">				<span class="keyword">var</span> args <span class="keyword">struct</span> &#123;</span><br><span class="line">					Query <span class="type">string</span> <span class="string">`json:&quot;query&quot;`</span></span><br><span class="line">				&#125;</span><br><span class="line">				json.Unmarshal([]<span class="type">byte</span>(toolCall.Function.Arguments), &amp;args)</span><br><span class="line"></span><br><span class="line">				observation = realTavilySearch(args.Query)</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 喂回 Observation</span></span><br><span class="line">			toolMessage := openai.ChatCompletionMessage&#123;</span><br><span class="line">				Role:       openai.ChatMessageRoleTool,</span><br><span class="line">				Name:       toolCall.Function.Name,</span><br><span class="line">				Content:    observation,</span><br><span class="line">				ToolCallID: toolCall.ID,</span><br><span class="line">			&#125;</span><br><span class="line">			historyMessages = <span class="built_in">append</span>(historyMessages, toolMessage)</span><br><span class="line">			fmt.Printf(<span class="string">&quot;      [Observation 网络数据回填完毕]\n\n&quot;</span>)</span><br><span class="line">		&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述就是<code>Agent</code>部分主要代码了，再来看看搜索部分函数的封装，基本上都是固定的</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">realTavilySearch</span><span class="params">(query <span class="type">string</span>)</span></span> <span class="type">string</span> &#123;</span><br><span class="line">	<span class="comment">// Tavily API Key</span></span><br><span class="line">	tavilyKey := <span class="string">&quot;tvly-xxxxx&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//组装符合 Tavily 官方规范的请求体</span></span><br><span class="line">	requestPayload := <span class="keyword">map</span>[<span class="type">string</span>]<span class="keyword">interface</span>&#123;&#125;&#123;</span><br><span class="line">		<span class="string">&quot;api_key&quot;</span>:      tavilyKey,</span><br><span class="line">		<span class="string">&quot;query&quot;</span>:        query,</span><br><span class="line">		<span class="string">&quot;search_depth&quot;</span>: <span class="string">&quot;basic&quot;</span>, <span class="comment">// 基础检索，速度最快，省额度</span></span><br><span class="line">	&#125;</span><br><span class="line">	jsonData, _ := json.Marshal(requestPayload)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 发起 HTTP POST 请求</span></span><br><span class="line">	req, err := http.NewRequest(<span class="string">&quot;POST&quot;</span>, <span class="string">&quot;https://api.tavily.com/search&quot;</span>, bytes.NewBuffer(jsonData))</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> fmt.Sprintf(<span class="string">&quot;[SYSTEM_ERROR]: 创建 HTTP 请求失败: %v&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">	req.Header.Set(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;application/json&quot;</span>)</span><br><span class="line"></span><br><span class="line">	client := &amp;http.Client&#123;Timeout: <span class="number">15</span> * time.Second&#125;</span><br><span class="line">	resp, err := client.Do(req)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> fmt.Sprintf(<span class="string">&quot;[SYSTEM_ERROR]: 联网搜索请求超时或失败: %v&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> resp.Body.Close()</span><br><span class="line"></span><br><span class="line">	<span class="comment">//解析 Tavily 返回的高清去重文本</span></span><br><span class="line">	<span class="keyword">var</span> tResp TavilyResponse</span><br><span class="line">	<span class="keyword">if</span> err := json.NewDecoder(resp.Body).Decode(&amp;tResp); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">&quot;[SYSTEM_ERROR]: 解析搜索引擎返回的 JSON 失败。&quot;</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 格式化提取到的真实网页线索，打包回传给大模型</span></span><br><span class="line">	<span class="keyword">var</span> buffer bytes.Buffer</span><br><span class="line">	buffer.WriteString(<span class="string">&quot;[互联网检索结果反馈]:\n&quot;</span>)</span><br><span class="line">	<span class="keyword">for</span> i, result := <span class="keyword">range</span> tResp.Results &#123;</span><br><span class="line">		<span class="keyword">if</span> i &gt;= <span class="number">3</span> &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125; <span class="comment">// 强行只取前 3 条最相关的，死死控住 Token 成本</span></span><br><span class="line">		buffer.WriteString(fmt.Sprintf(<span class="string">&quot;%d. 标题: %s\n   链接: %s\n   核心内容: %s\n\n&quot;</span>, i+<span class="number">1</span>, result.Title, result.URL, result.Content))</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> buffer.String()</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>完整代码请见  <a target="_blank" rel="noopener" href="https://gist.github.com/LongLongMorty/8c2324d0180fab689156dcddac0a21a2">https://gist.github.com/LongLongMorty/8c2324d0180fab689156dcddac0a21a2</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://LongLongMorty.github.io">LongMorty</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://longlongmorty.github.io/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/">https://longlongmorty.github.io/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://LongLongMorty.github.io" target="_blank">LongMorty</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Agent/">Agent</a><a class="post-meta__tags" href="/tags/GO/">GO</a></div><div class="post-share"><div class="social-share" data-image="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613221016838.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/06/13/Learn-Tool-Use-RAG-And-Memory/" title="Learn Tool Use, RAG, And Memory"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613173544233.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Learn Tool Use, RAG, And Memory</div></div><div class="info-2"><div class="info-item-1">介绍Agent里面工具、RAG以及Memory部分</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/12/Go%E8%AF%AD%E8%A8%80-Deepseek-API%E5%81%9A%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8Fagent%E6%95%99%E5%AD%A6/" title="Go语言+Deepseek API做一个最小agent教学"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260612214914986.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-12</div><div class="info-item-2">Go语言+Deepseek API做一个最小agent教学</div></div><div class="info-2"><div class="info-item-1">简单介绍Go语言实现最小Agent</div></div></div></a><a class="pagination-related" href="/2026/06/11/Understand-What-An-Agent-Is/" title="Understand What An Agent Is"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260611165812306.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-11</div><div class="info-item-2">Understand What An Agent Is</div></div><div class="info-2"><div class="info-item-1">简单介绍Agent相关的一些内容</div></div></div></a><a class="pagination-related" href="/2026/06/13/Learn-Tool-Use-RAG-And-Memory/" title="Learn Tool Use, RAG, And Memory"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613173544233.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-13</div><div class="info-item-2">Learn Tool Use, RAG, And Memory</div></div><div class="info-2"><div class="info-item-1">介绍Agent里面工具、RAG以及Memory部分</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">LongMorty</div><div class="author-info-description">热爱编程，分享技术知识</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">10</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/LongLongMorty"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/LongLongMorty" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:2134693323@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的博客！这里分享我的技术学习笔记和项目经验。</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/" title="GO语言 实现资料研究助手mini Agent"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613221016838.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GO语言 实现资料研究助手mini Agent"/></a><div class="content"><a class="title" href="/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/" title="GO语言 实现资料研究助手mini Agent">GO语言 实现资料研究助手mini Agent</a><time datetime="2026-06-13T14:04:23.000Z" title="发表于 2026-06-13 22:04:23">2026-06-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/13/Learn-Tool-Use-RAG-And-Memory/" title="Learn Tool Use, RAG, And Memory"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613173544233.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Learn Tool Use, RAG, And Memory"/></a><div class="content"><a class="title" href="/2026/06/13/Learn-Tool-Use-RAG-And-Memory/" title="Learn Tool Use, RAG, And Memory">Learn Tool Use, RAG, And Memory</a><time datetime="2026-06-13T09:22:25.000Z" title="发表于 2026-06-13 17:22:25">2026-06-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/12/Go%E8%AF%AD%E8%A8%80-Deepseek-API%E5%81%9A%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8Fagent%E6%95%99%E5%AD%A6/" title="Go语言+Deepseek API做一个最小agent教学"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260612214914986.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Go语言+Deepseek API做一个最小agent教学"/></a><div class="content"><a class="title" href="/2026/06/12/Go%E8%AF%AD%E8%A8%80-Deepseek-API%E5%81%9A%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8Fagent%E6%95%99%E5%AD%A6/" title="Go语言+Deepseek API做一个最小agent教学">Go语言+Deepseek API做一个最小agent教学</a><time datetime="2026-06-12T13:46:14.000Z" title="发表于 2026-06-12 21:46:14">2026-06-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/11/Understand-What-An-Agent-Is/" title="Understand What An Agent Is"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260611165812306.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Understand What An Agent Is"/></a><div class="content"><a class="title" href="/2026/06/11/Understand-What-An-Agent-Is/" title="Understand What An Agent Is">Understand What An Agent Is</a><time datetime="2026-06-11T08:53:24.000Z" title="发表于 2026-06-11 16:53:24">2026-06-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/04/19/cpp%E9%94%81%E6%9C%BA%E5%88%B6/" title="cpp锁机制"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260612215308996.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="cpp锁机制"/></a><div class="content"><a class="title" href="/2026/04/19/cpp%E9%94%81%E6%9C%BA%E5%88%B6/" title="cpp锁机制">cpp锁机制</a><time datetime="2026-04-19T08:57:35.000Z" title="发表于 2026-04-19 16:57:35">2026-04-19</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By LongMorty</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script src="/js/custom.js"></script><canvas class="fireworks" mobile="true"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      false
+        ? pjax.loadUrl('/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
