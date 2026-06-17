@@ -1,0 +1,294 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Plan-and-Solve模式 | LongMorty</title><meta name="author" content="LongMorty"><meta name="copyright" content="LongMorty"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="Plan-and-Solve模式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Plan-and-Solve模式">
+<meta property="og:url" content="https://longlongmorty.github.io/2026/06/18/Plan-and-Solve%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="LongMorty">
+<meta property="og:description" content="Plan-and-Solve模式">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260618002207769.png">
+<meta property="article:published_time" content="2026-06-17T16:10:57.000Z">
+<meta property="article:modified_time" content="2026-06-17T16:22:34.556Z">
+<meta property="article:author" content="LongMorty">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="GO">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260618002207769.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Plan-and-Solve模式",
+  "url": "https://longlongmorty.github.io/2026/06/18/Plan-and-Solve%E6%A8%A1%E5%BC%8F/",
+  "image": "https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260618002207769.png",
+  "datePublished": "2026-06-17T16:10:57.000Z",
+  "dateModified": "2026-06-17T16:22:34.556Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "LongMorty",
+      "url": "https://LongLongMorty.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png"><link rel="canonical" href="https://longlongmorty.github.io/2026/06/18/Plan-and-Solve%E6%A8%A1%E5%BC%8F/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Plan-and-Solve模式',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.1"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260618002207769.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" alt="Logo"><span class="site-name">LongMorty</span></a><a class="nav-page-title" href="/"><span class="site-name">Plan-and-Solve模式</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Plan-and-Solve模式</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-17T16:10:57.000Z" title="发表于 2026-06-18 00:10:57">2026-06-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-17T16:22:34.556Z" title="更新于 2026-06-18 00:22:34">2026-06-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Agent/">Agent</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="Plan-and-Solve模式"><a href="#Plan-and-Solve模式" class="headerlink" title="Plan-and-Solve模式"></a>Plan-and-Solve模式</h2><p>在我们掌握了 ReAct 这种反应式的、步进决策的智能体范式后，接下来将探讨一种风格迥异但同样强大的方法，<strong>Plan-and-Solve</strong>。顾名思义，这种范式将任务处理明确地分为两个阶段：<strong>先规划 (Plan)，后执行 (Solve)</strong>。</p>
+<p>如果说 ReAct 像一个经验丰富的侦探，根据现场的蛛丝马迹（Observation）一步步推理，随时调整自己的调查方向；那么 Plan-and-Solve 则更像一位建筑师，在动工之前必须先绘制出完整的蓝图（Plan），然后严格按照蓝图来施工（Solve）。事实上我们现在用的很多大模型工具的Agent模式都融入了这种设计模式。</p>
+<table>
+<thead>
+<tr>
+<th><strong>维度</strong></th>
+<th><strong>ReAct 模式 (边想边做)</strong></th>
+<th><strong>Plan-and-Solve 模式 (先谋后动)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>核心思想</strong></td>
+<td><strong>Thought -&gt; Action -&gt; Observation</strong> 循环。走一步看一步，根据工具返回的结果决定下一步做什么。</td>
+<td><strong>Plan -&gt; Solve (Sub-tasks)</strong>。先生成全局路线图，然后按部就班地把每个子任务消灭。</td>
+</tr>
+<tr>
+<td><strong>思维方式</strong></td>
+<td>动态调整、应变能力强、深度依赖即时反馈。</td>
+<td>结构化、条理清晰、顾全大局，不容易跑偏。</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>探索性任务、需要频繁和环境交互（如查数据库、实时搜索、调 API）。</td>
+<td>复杂的长文本创作、多步骤的数学&#x2F;逻辑推理、目标明确的流水线任务。</td>
+</tr>
+<tr>
+<td><strong>缺点</strong></td>
+<td>容易陷入死循环（Looping），或者走着走着“忘了初衷”（Goal Drift）。</td>
+<td>如果初始计划有误，而执行中没有微调机制，可能会“一条道走到黑”。</td>
+</tr>
+</tbody></table>
+<h3 id="规划阶段"><a href="#规划阶段" class="headerlink" title="规划阶段"></a>规划阶段</h3><p>规划阶段的核心目标是“去模糊化”<strong>。大模型直接面对复杂任务时容易顾此失彼，Planner 的任务就是通过 Prompt Engineering，逼迫 LLM 输出一个</strong>结构化的任务列表。</p>
+<p>在实际工程中，我们通常让 Planner 返回 <strong>JSON 数组</strong>，这样 Go 语言就能轻松地将其解析为切片（Slice）。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;encoding/json&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;github.com/sashabaranov/go-openai&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义子任务的结构体</span></span><br><span class="line"><span class="keyword">type</span> SubTask <span class="keyword">struct</span> &#123;</span><br><span class="line">	ID          <span class="type">int</span>    <span class="string">`json:&quot;id&quot;`</span></span><br><span class="line">	Description <span class="type">string</span> <span class="string">`json:&quot;description&quot;`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Planner 结构体</span></span><br><span class="line"><span class="keyword">type</span> Planner <span class="keyword">struct</span> &#123;</span><br><span class="line">	client *openai.Client</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Planner)</span></span> GeneratePlan(mainTask <span class="type">string</span>) ([]SubTask, <span class="type">error</span>) &#123;</span><br><span class="line">	prompt := fmt.Sprintf(<span class="string">`你是一个专业的任务规划器。请将以下任务拆解为具体的、有前后依赖关系的子任务步骤。</span></span><br><span class="line"><span class="string">必须严格以 JSON 数组的格式输出，不要包含任何 Markdown 标记（如 `</span>+<span class="string">&quot;```json&quot;</span>+<span class="string">`）或额外解释。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">格式示例：</span></span><br><span class="line"><span class="string">[&#123;&quot;id&quot;: 1, &quot;description&quot;: &quot;步骤1...&quot;&#125;, &#123;&quot;id&quot;: 2, &quot;description&quot;: &quot;步骤2...&quot;&#125;]</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">大任务: %s`</span>, mainTask)</span><br><span class="line"></span><br><span class="line">	resp, err := p.client.CreateChatCompletion(</span><br><span class="line">		context.Background(),</span><br><span class="line">		openai.ChatCompletionRequest&#123;</span><br><span class="line">			Model: openai.GPT4o,</span><br><span class="line">			Messages: []openai.ChatCompletionMessage&#123;</span><br><span class="line">				&#123;Role: openai.ChatMessageRoleUser, Content: prompt&#125;,</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">	)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 解析 JSON 到 Go 结构体切片</span></span><br><span class="line">	<span class="keyword">var</span> plan []SubTask</span><br><span class="line">	err = json.Unmarshal([]<span class="type">byte</span>(resp.Choices[<span class="number">0</span>].Message.Content), &amp;plan)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">&quot;解析 JSON 失败: %v, 原始数据: %s&quot;</span>, err, resp.Choices[<span class="number">0</span>].Message.Content)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> plan, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="执行器与状态管理（Executor-State-Manager）"><a href="#执行器与状态管理（Executor-State-Manager）" class="headerlink" title="执行器与状态管理（Executor &amp; State Manager）"></a>执行器与状态管理（Executor &amp; State Manager）</h3><p>这两个部分在运行时是<strong>紧密交织</strong>的。</p>
+<ul>
+<li><strong>状态管理器</strong>：维护一个“全局黑板”。执行器每做完一步，就把结果写到黑板上。</li>
+<li><strong>执行器</strong>：每开始新的一步，先去黑板上读一读之前的上下文（Context），确保自己拥有最新的“记忆”，然后开始执行。</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 状态管理器 (State Manager)</span></span><br><span class="line"><span class="keyword">type</span> StateManager <span class="keyword">struct</span> &#123;</span><br><span class="line">	MainTask     <span class="type">string</span>            <span class="comment">// 原始大任务</span></span><br><span class="line">	Plan         []SubTask         <span class="comment">// 规划的步骤列表</span></span><br><span class="line">	CurrentStep  <span class="type">int</span>               <span class="comment">// 当前执行到第几步</span></span><br><span class="line">	StepResults  <span class="keyword">map</span>[<span class="type">int</span>]<span class="type">string</span>    <span class="comment">// 存放每一步的执行结果：key是TaskID, value是结果</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewStateManager</span><span class="params">(task <span class="type">string</span>, plan []SubTask)</span></span> *StateManager &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;StateManager&#123;</span><br><span class="line">		MainTask:    task,</span><br><span class="line">		Plan:        plan,</span><br><span class="line">		CurrentStep: <span class="number">0</span>,</span><br><span class="line">		StepResults: <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">int</span>]<span class="type">string</span>),</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 汇总目前所有的上下文信息，供执行器参考</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sm *StateManager)</span></span> GetSummaryContext() <span class="type">string</span> &#123;</span><br><span class="line">	<span class="keyword">var</span> sb strings.Builder</span><br><span class="line">	sb.WriteString(fmt.Sprintf(<span class="string">&quot;总任务: %s\n已完成的历史步骤:\n&quot;</span>, sm.MainTask))</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; sm.CurrentStep; i++ &#123;</span><br><span class="line">		task := sm.Plan[i]</span><br><span class="line">		sb.Printf(<span class="string">&quot;- 步骤 %d [%s] 结果: %s\n&quot;</span>, task.ID, task.Description, sm.StepResults[task.ID])</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> sb.String()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 执行器 (Executor)</span></span><br><span class="line"><span class="keyword">type</span> Executor <span class="keyword">struct</span> &#123;</span><br><span class="line">	client *openai.Client</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *Executor)</span></span> Execute(task SubTask, ctxHistory <span class="type">string</span>) (<span class="type">string</span>, <span class="type">error</span>) &#123;</span><br><span class="line">	prompt := fmt.Sprintf(<span class="string">`你是一个高效的执行器。请根据【历史背景信息】，完成当前的【当前子任务】。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">【历史背景信息】:</span></span><br><span class="line"><span class="string">%s</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">【当前子任务】:</span></span><br><span class="line"><span class="string">%s</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">请直接输出该步骤的最终执行结果，不要有多余的废话。`</span>, ctxHistory, task.Description)</span><br><span class="line"></span><br><span class="line">	resp, err := e.client.CreateChatCompletion(</span><br><span class="line">		context.Background(),</span><br><span class="line">		openai.ChatCompletionRequest&#123;</span><br><span class="line">			Model: <span class="string">&quot;gpt-5.4-mini&quot;</span>,</span><br><span class="line">			Messages: []openai.ChatCompletionMessage&#123;</span><br><span class="line">				&#123;Role: openai.ChatMessageRoleUser, Content: prompt&#125;,</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">	)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">&quot;&quot;</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> resp.Choices[<span class="number">0</span>].Message.Content, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>有了这两个组件后，你的主程序逻辑会变得异常清晰和健壮。可以轻松地在步骤之间加入<strong>日志、错误重试、甚至人工审批（Human-in-the-loop）</strong>。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	</span><br><span class="line">	task := <span class="string">&quot;写一篇高分高考作文格式是什么样的&quot;</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 1. 规划阶段</span></span><br><span class="line">	planner := Planner&#123;client: client&#125;</span><br><span class="line">	plan, _ := planner.GeneratePlan(task)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 2. 初始化状态管理器</span></span><br><span class="line">	state := NewStateManager(task, plan)</span><br><span class="line">	executor := Executor&#123;client: client&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 3. 循环执行与状态更新</span></span><br><span class="line">	<span class="keyword">for</span> _, subTask := <span class="keyword">range</span> state.Plan &#123;</span><br><span class="line">		fmt.Printf(<span class="string">&quot; [状态] 开始执行第 %d 步: %s\n&quot;</span>, subTask.ID, subTask.Description)</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// 获取当前的所有历史上下文</span></span><br><span class="line">		currentContext := state.GetSummaryContext()</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// 执行器干活</span></span><br><span class="line">		result, _ := executor.Execute(subTask, currentContext)</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// 状态管理器记录结果</span></span><br><span class="line">		state.StepResults[subTask.ID] = result</span><br><span class="line">		state.CurrentStep++</span><br><span class="line">		</span><br><span class="line">		fmt.Printf(<span class="string">&quot; [状态] 第 %d 步执行成功。\n\n&quot;</span>, subTask.ID)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	fmt.Println(<span class="string">&quot; Final Result:&quot;</span>, state.StepResults[<span class="built_in">len</span>(plan)])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260618000730528.png"></p>
+<p>完整代码放在了： <a target="_blank" rel="noopener" href="https://gist.github.com/LongLongMorty/630958fc3425e27b14f2f760a56e290c">https://gist.github.com/LongLongMorty/630958fc3425e27b14f2f760a56e290c</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://LongLongMorty.github.io">LongMorty</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://longlongmorty.github.io/2026/06/18/Plan-and-Solve%E6%A8%A1%E5%BC%8F/">https://longlongmorty.github.io/2026/06/18/Plan-and-Solve%E6%A8%A1%E5%BC%8F/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://LongLongMorty.github.io" target="_blank">LongMorty</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Agent/">Agent</a><a class="post-meta__tags" href="/tags/GO/">GO</a></div><div class="post-share"><div class="social-share" data-image="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260618002207769.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/" title="GO语言 实现资料研究助手mini Agent"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613221016838.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">GO语言 实现资料研究助手mini Agent</div></div><div class="info-2"><div class="info-item-1">一个资料研究助手demo项目，输入主题后自动搜索、筛选、总结并输出引用链接。</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/12/Go%E8%AF%AD%E8%A8%80-Deepseek-API%E5%81%9A%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8Fagent%E6%95%99%E5%AD%A6/" title="Go语言+Deepseek API做一个最小agent教学"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260612214914986.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-12</div><div class="info-item-2">Go语言+Deepseek API做一个最小agent教学</div></div><div class="info-2"><div class="info-item-1">简单介绍Go语言实现最小Agent</div></div></div></a><a class="pagination-related" href="/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/" title="GO语言 实现资料研究助手mini Agent"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613221016838.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-13</div><div class="info-item-2">GO语言 实现资料研究助手mini Agent</div></div><div class="info-2"><div class="info-item-1">一个资料研究助手demo项目，输入主题后自动搜索、筛选、总结并输出引用链接。</div></div></div></a><a class="pagination-related" href="/2026/06/13/Learn-Tool-Use-RAG-And-Memory/" title="Learn Tool Use, RAG, And Memory"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613173544233.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-13</div><div class="info-item-2">Learn Tool Use, RAG, And Memory</div></div><div class="info-2"><div class="info-item-1">介绍Agent里面工具、RAG以及Memory部分</div></div></div></a><a class="pagination-related" href="/2026/06/11/Understand-What-An-Agent-Is/" title="Understand What An Agent Is"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260611165812306.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-11</div><div class="info-item-2">Understand What An Agent Is</div></div><div class="info-2"><div class="info-item-1">简单介绍Agent相关的一些内容</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">LongMorty</div><div class="author-info-description">热爱编程，分享技术知识</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/LongLongMorty"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/LongLongMorty" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:2134693323@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的博客！这里分享我的技术学习笔记和项目经验。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Plan-and-Solve%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.</span> <span class="toc-text">Plan-and-Solve模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%84%E5%88%92%E9%98%B6%E6%AE%B5"><span class="toc-number">1.1.</span> <span class="toc-text">规划阶段</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E5%99%A8%E4%B8%8E%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86%EF%BC%88Executor-State-Manager%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">执行器与状态管理（Executor &amp; State Manager）</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/06/18/Plan-and-Solve%E6%A8%A1%E5%BC%8F/" title="Plan-and-Solve模式"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260618002207769.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Plan-and-Solve模式"/></a><div class="content"><a class="title" href="/2026/06/18/Plan-and-Solve%E6%A8%A1%E5%BC%8F/" title="Plan-and-Solve模式">Plan-and-Solve模式</a><time datetime="2026-06-17T16:10:57.000Z" title="发表于 2026-06-18 00:10:57">2026-06-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/" title="GO语言 实现资料研究助手mini Agent"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613221016838.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GO语言 实现资料研究助手mini Agent"/></a><div class="content"><a class="title" href="/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/" title="GO语言 实现资料研究助手mini Agent">GO语言 实现资料研究助手mini Agent</a><time datetime="2026-06-13T14:04:23.000Z" title="发表于 2026-06-13 22:04:23">2026-06-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/13/Learn-Tool-Use-RAG-And-Memory/" title="Learn Tool Use, RAG, And Memory"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613173544233.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Learn Tool Use, RAG, And Memory"/></a><div class="content"><a class="title" href="/2026/06/13/Learn-Tool-Use-RAG-And-Memory/" title="Learn Tool Use, RAG, And Memory">Learn Tool Use, RAG, And Memory</a><time datetime="2026-06-13T09:22:25.000Z" title="发表于 2026-06-13 17:22:25">2026-06-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/12/Go%E8%AF%AD%E8%A8%80-Deepseek-API%E5%81%9A%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8Fagent%E6%95%99%E5%AD%A6/" title="Go语言+Deepseek API做一个最小agent教学"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260612214914986.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Go语言+Deepseek API做一个最小agent教学"/></a><div class="content"><a class="title" href="/2026/06/12/Go%E8%AF%AD%E8%A8%80-Deepseek-API%E5%81%9A%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8Fagent%E6%95%99%E5%AD%A6/" title="Go语言+Deepseek API做一个最小agent教学">Go语言+Deepseek API做一个最小agent教学</a><time datetime="2026-06-12T13:46:14.000Z" title="发表于 2026-06-12 21:46:14">2026-06-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/11/Understand-What-An-Agent-Is/" title="Understand What An Agent Is"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260611165812306.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Understand What An Agent Is"/></a><div class="content"><a class="title" href="/2026/06/11/Understand-What-An-Agent-Is/" title="Understand What An Agent Is">Understand What An Agent Is</a><time datetime="2026-06-11T08:53:24.000Z" title="发表于 2026-06-11 16:53:24">2026-06-11</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By LongMorty</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script src="/js/custom.js"></script><canvas class="fireworks" mobile="true"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      false
+        ? pjax.loadUrl('/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
