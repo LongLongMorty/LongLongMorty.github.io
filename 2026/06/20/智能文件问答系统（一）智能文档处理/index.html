@@ -1,0 +1,369 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>智能文件问答系统（一）智能文档处理 | LongMorty</title><meta name="author" content="LongMorty"><meta name="copyright" content="LongMorty"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="Go语言构建的一个单文档的智能问答系统，本文介绍使用&#96;MinerU&#96;实现PDF到Markdown的统一转换，基于Markdown结构的智能分块策略">
+<meta property="og:type" content="article">
+<meta property="og:title" content="智能文件问答系统（一）智能文档处理">
+<meta property="og:url" content="https://longlongmorty.github.io/2026/06/20/%E6%99%BA%E8%83%BD%E6%96%87%E4%BB%B6%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%80%EF%BC%89%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="LongMorty">
+<meta property="og:description" content="Go语言构建的一个单文档的智能问答系统，本文介绍使用&#96;MinerU&#96;实现PDF到Markdown的统一转换，基于Markdown结构的智能分块策略">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260620180956070.png">
+<meta property="article:published_time" content="2026-06-20T10:03:26.000Z">
+<meta property="article:modified_time" content="2026-06-20T10:11:43.211Z">
+<meta property="article:author" content="LongMorty">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="GO">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260620180956070.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "智能文件问答系统（一）智能文档处理",
+  "url": "https://longlongmorty.github.io/2026/06/20/%E6%99%BA%E8%83%BD%E6%96%87%E4%BB%B6%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%80%EF%BC%89%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E5%A4%84%E7%90%86/",
+  "image": "https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260620180956070.png",
+  "datePublished": "2026-06-20T10:03:26.000Z",
+  "dateModified": "2026-06-20T10:11:43.211Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "LongMorty",
+      "url": "https://LongLongMorty.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png"><link rel="canonical" href="https://longlongmorty.github.io/2026/06/20/%E6%99%BA%E8%83%BD%E6%96%87%E4%BB%B6%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%80%EF%BC%89%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E5%A4%84%E7%90%86/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '智能文件问答系统（一）智能文档处理',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.1"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">12</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260620180956070.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" alt="Logo"><span class="site-name">LongMorty</span></a><a class="nav-page-title" href="/"><span class="site-name">智能文件问答系统（一）智能文档处理</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">智能文件问答系统（一）智能文档处理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-20T10:03:26.000Z" title="发表于 2026-06-20 18:03:26">2026-06-20</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-20T10:11:43.211Z" title="更新于 2026-06-20 18:11:43">2026-06-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Agent/">Agent</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="智能文件问答系统（一）智能文档处理"><a href="#智能文件问答系统（一）智能文档处理" class="headerlink" title="智能文件问答系统（一）智能文档处理"></a>智能文件问答系统（一）智能文档处理</h2><p>让我们通过一个完整的实战案例，展示如何将记忆系统和RAG系统有机结合，构建一个智能文档问答助手。</p>
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>在实际工作中，我们经常需要处理大量的技术文档、研究论文、产品手册等PDF文件。传统的文档阅读方式效率低下，难以快速定位关键信息，更无法建立知识间的关联。本案例将基于动手学大模型教程Happy-LLM的公测PDF文档<code>Happy-LLM-0727.pdf</code>为例，用Go语言构建一个<strong>单文档的智能问答系统</strong>。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/LongLongMorty/DocumentAssistant">智能文件问答系统</a></p>
+<p>我们将实现以下功能：</p>
+<ol>
+<li><strong>智能文档处理</strong>：使用<code>MinerU</code>实现PDF到Markdown的统一转换，基于Markdown结构的智能分块策略，高效的向量化和索引构建</li>
+<li><strong>高级检索问答</strong>：多查询扩展（MQE）提升召回率，假设文档嵌入（HyDE）改善检索精度，上下文感知的智能问答</li>
+<li><strong>多层次记忆管理</strong>：工作记忆管理当前学习任务和上下文，情景记忆记录学习事件和查询历史，语义记忆存储概念知识和理解，感知记忆处理文档特征和多模态信息</li>
+<li><strong>个性化学习支持</strong>：基于学习历史的个性化推荐，记忆整合和选择性遗忘，学习报告生成和进度追踪</li>
+</ol>
+<h3 id="PDF到Markdown的统一转换"><a href="#PDF到Markdown的统一转换" class="headerlink" title="PDF到Markdown的统一转换"></a>PDF到Markdown的统一转换</h3><p>一般情况使用使用<code>MarkItDown</code>实现PDF到Markdown的统一转换即可，但复杂 PDF（论文、报表、扫描件）复杂文档还是选择<code>MinerU</code>，下面是它们的对比：</p>
+<table>
+<thead>
+<tr>
+<th>对比维度</th>
+<th>MarkItDown</th>
+<th>MinerU</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>支持文件类型</strong></td>
+<td>全覆盖：PDF&#x2F;Word&#x2F;PPT&#x2F;Excel&#x2F; 图片 &#x2F; 音频 &#x2F; 网页 &#x2F; YouTube &#x2F; 压缩包 &#x2F; EPUB</td>
+<td>主打 PDF、图片扫描件；少量支持 Word&#x2F;EPUB，<strong>不支持 PPT&#x2F;Excel&#x2F; 音频</strong></td>
+</tr>
+<tr>
+<td><strong>版面解析能力</strong></td>
+<td>弱：仅提取纯文本，丢失标题层级、多栏布局、图文关系；表格易错乱、图片仅占位符</td>
+<td>极强：AI 检测 H1&#x2F;H2 标题、分栏、段落、浮动图表、页眉页脚自动过滤；还原阅读顺序</td>
+</tr>
+<tr>
+<td><strong>表格处理</strong></td>
+<td>简单表格勉强识别，合并单元格、复杂报表直接打散成纯文本</td>
+<td>专业 TableMaster 模型，支持合并单元格、多层表头，输出 MD 表格 &#x2F; HTML 表格</td>
+</tr>
+<tr>
+<td><strong>公式识别</strong></td>
+<td>完全不支持，数学符号乱码</td>
+<td>UniMERNet 模型识别公式，输出标准 LaTeX 代码</td>
+</tr>
+<tr>
+<td><strong>扫描件 OCR</strong></td>
+<td>基础 OCR，精度一般，无版面校正</td>
+<td>内置 PaddleOCR，84 种语言，倾斜 &#x2F; 模糊扫描件校正，识别精度高</td>
+</tr>
+<tr>
+<td><strong>输出格式</strong></td>
+<td>仅 Markdown</td>
+<td>Markdown &#x2F; JSON 结构化元数据 &#x2F; HTML &#x2F; LaTeX</td>
+</tr>
+<tr>
+<td><strong>硬件资源</strong></td>
+<td>轻量，纯 CPU 流畅运行，无大模型依赖</td>
+<td>依赖深度学习模型，<strong>推荐 GPU 加速</strong>；CPU 速度很慢</td>
+</tr>
+<tr>
+<td><strong>部署难度</strong></td>
+<td>pip 一键安装，无额外模型下载，插件扩展灵活</td>
+<td>初次运行自动下载大量权重，Docker 部署更稳定，配置复杂</td>
+</tr>
+<tr>
+<td><strong>适用文档复杂度</strong></td>
+<td>简单单栏纯文字、普通办公文档</td>
+<td>学术论文、财务报表、合同、扫描档案、图文混排复杂 PDF</td>
+</tr>
+</tbody></table>
+<p><a target="_blank" rel="noopener" href="https://github.com/opendatalab/mineru">https://github.com/opendatalab/mineru</a></p>
+<h3 id="Markdown-解析、章节、分块"><a href="#Markdown-解析、章节、分块" class="headerlink" title="Markdown 解析、章节、分块"></a>Markdown 解析、章节、分块</h3><p><code>Document/chunk.go</code>实现了<strong>面向 RAG（Retrieval-Augmented Generation，检索增强生成）系统的 Markdown 文档解析与切片（Chunking）工具</strong>。</p>
+<p>简单来说，它的核心任务是：<strong>把一篇长篇的 Markdown 文章，按照结构（标题层级）切分成一小块一小块的“文本段”，并保留上下文元数据（比如这个段落属于哪个标题、占第几行、有没有表格等），以便后续喂给大模型或向量数据库。</strong></p>
+<h4 id="1-核心数据结构"><a href="#1-核心数据结构" class="headerlink" title="1. 核心数据结构"></a>1. 核心数据结构</h4><p>代码定义了四个核心结构体，它们层层递进，构建了文档的立体模型：</p>
+<ul>
+<li><p><strong><code>Document</code></strong>：顶层文档对象。包含文档 ID、文件路径、文章标题，以及由多个 <code>Section</code> 组成的切片。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Document <span class="keyword">struct</span> &#123;</span><br><span class="line">	ID       <span class="type">string</span></span><br><span class="line">	Path     <span class="type">string</span></span><br><span class="line">	Title    <span class="type">string</span></span><br><span class="line">	Sections []Section</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>Section</code></strong>：<strong>章节&#x2F;段落</strong>。这是解析时的基本单位。每当遇到 <code>#</code>、<code>##</code> 等标题时，代码就会切分出一个新的 Section。它记录了当前章节的标题、层级（<code>Level</code>）、从哪一行开始到哪一行结束（<code>StartLine</code>&#x2F;<code>EndLine</code>），以及当前章节在整个目录树中的路径（<code>Path</code>，例如 <code>[&quot;第一章&quot;, &quot;第一节&quot;, &quot;小节A&quot;]</code>）。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Section <span class="keyword">struct</span> &#123;</span><br><span class="line">	ID        <span class="type">string</span></span><br><span class="line">	Title     <span class="type">string</span></span><br><span class="line">	Level     <span class="type">int</span></span><br><span class="line">	Path      []<span class="type">string</span></span><br><span class="line">	StartLine <span class="type">int</span></span><br><span class="line">	EndLine   <span class="type">int</span></span><br><span class="line">	Content   <span class="type">string</span></span><br><span class="line">	HasTable  <span class="type">bool</span></span><br><span class="line">	HasImage  <span class="type">bool</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>Chunk</code></strong>：<strong>切片</strong>。这是最终输出给大模型使用的结果。如果一个 <code>Section</code> 的字数太长，它会被进一步切碎成多个 <code>Chunk</code>。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Chunk <span class="keyword">struct</span> &#123;</span><br><span class="line">	ID        <span class="type">string</span></span><br><span class="line">	DocID     <span class="type">string</span></span><br><span class="line">	SectionID <span class="type">string</span></span><br><span class="line">	Text      <span class="type">string</span></span><br><span class="line">	Runes     <span class="type">int</span> <span class="comment">// 按Unicode 字符数</span></span><br><span class="line">	Metadata  ChunkMetadata</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>ChunkMetadata</code></strong>：切片的元数据。带上了这些元数据（如父级标题路径、是否有表格&#x2F;图片），大模型在做语义检索时就能获得更精准的上下文。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ChunkMetadata <span class="keyword">struct</span> &#123;</span><br><span class="line">	TitlePath []<span class="type">string</span></span><br><span class="line">	Heading   <span class="type">string</span></span><br><span class="line">	Level     <span class="type">int</span></span><br><span class="line">	StartLine <span class="type">int</span></span><br><span class="line">	EndLine   <span class="type">int</span></span><br><span class="line">	HasTable  <span class="type">bool</span></span><br><span class="line">	HasImage  <span class="type">bool</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="2-Markdown-解析流程-ParseMarkdown"><a href="#2-Markdown-解析流程-ParseMarkdown" class="headerlink" title="2. Markdown 解析流程 (ParseMarkdown)"></a>2. Markdown 解析流程 (<code>ParseMarkdown</code>)</h4><p>这是代码中最复杂的部分，采用的是<strong>状态机流式扫描</strong>（行扫描）的方式：</p>
+<ol>
+<li><strong>处理代码块（Fence）</strong>：通过 <code>isFenceLine</code> 检查是否进入了 &#96;&#96;&#96;&#96;&#96; 或 <code>~~~</code> 包裹的代码块。如果在代码块内部，即使里面有 <code>#</code> 也<strong>不会</strong>被误判为标题。</li>
+<li><strong>提取标题与树状路径（Stack 栈的应用）</strong>：<ul>
+<li>当遇到新标题时，会利用一个模拟的 <code>stack</code>（栈）来维护当前的目录层级。</li>
+<li>如果新标题的层级比栈顶的低（比如从 <code>###</code> 回到 <code>##</code>），它会把栈里所有更深层级的章节“弹出”，以此确保 <code>section.Path</code> 始终能准确反映当前段落的父级关系。</li>
+</ul>
+</li>
+<li><strong>动态特征捕获</strong>：在结束一个章节时（<code>finishCurrent</code>），代码会顺便扫描这段内容里有没有 <code>&lt;table</code>、<code>|---</code>（Markdown表格标准语法）或 <code>![</code>（图片），并把 <code>HasTable</code> 和 <code>HasImage</code> 标记为 <code>true</code>。</li>
+</ol>
+<h4 id="3-智能重叠切片算法-ChunkDocument"><a href="#3-智能重叠切片算法-ChunkDocument" class="headerlink" title="3. 智能重叠切片算法 (ChunkDocument)"></a>3. 智能重叠切片算法 (<code>ChunkDocument</code>)</h4><p>当要把一个长章节切分成固定大小（默认 1200 个字符）的 <code>Chunk</code> 时，代码实现了一个非常经典的<strong>带重叠窗口（Overlap）的滑动切片算法</strong>。</p>
+<p>为了防止一句话在正中间被死板地切断导致大模型看不懂，它支持设置 <code>overlapRunes</code>（默认 160 个字符）。这意味着相邻的两个 Chunk 之间有一段文本是重复的，保证了上下文的连续性。</p>
+<p>如果刚好到了 1200 个字，代码不会直接一刀切，而是<strong>从后往前倒查</strong>：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findSplitPoint</span><span class="params">(runes []<span class="type">rune</span>, start <span class="type">int</span>, end <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> i := end; i &gt; start; i-- &#123;</span><br><span class="line">       <span class="keyword">switch</span> runes[i<span class="number">-1</span>] &#123;</span><br><span class="line">       <span class="keyword">case</span> <span class="string">&#x27;\n&#x27;</span>, <span class="string">&#x27;。&#x27;</span>, <span class="string">&#x27;！&#x27;</span>, <span class="string">&#x27;？&#x27;</span>, <span class="string">&#x27;.&#x27;</span>, <span class="string">&#x27;!&#x27;</span>, <span class="string">&#x27;?&#x27;</span>:</span><br><span class="line">          <span class="keyword">return</span> i</span><br><span class="line">       &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> end</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>它会优先寻找<strong>换行符、中文句号&#x2F;叹号&#x2F;问号、英文句号&#x2F;叹号&#x2F;问号</strong>。也就是说，它会尽量让每一个 Chunk 在一个<strong>完整的句子结束处</strong>断开。</p>
+<h5 id="循环滑动窗口主体"><a href="#循环滑动窗口主体" class="headerlink" title="循环滑动窗口主体"></a>循环滑动窗口主体</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> parts []<span class="type">string</span></span><br><span class="line">start := <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> start &lt; <span class="built_in">len</span>(runes) &#123;</span><br><span class="line">	end := start + maxRunes</span><br><span class="line">	<span class="keyword">if</span> end &gt;= <span class="built_in">len</span>(runes) &#123;</span><br><span class="line">		<span class="comment">// 剩余文本不足一个窗口，直接收尾</span></span><br><span class="line">		parts = <span class="built_in">append</span>(parts, strings.TrimSpace(<span class="type">string</span>(runes[start:])))</span><br><span class="line">		<span class="keyword">break</span></span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>start</code>：当前窗口起始下标；</li>
+<li><code>end</code>：理论最大切割边界（start + 最大块长度）；</li>
+<li>若剩余文本撑不满一整个窗口，直接截取末尾剩余内容，循环结束。</li>
+</ul>
+<h5 id="语义断点切割（核心优化点，区别于简陋滑动分块）"><a href="#语义断点切割（核心优化点，区别于简陋滑动分块）" class="headerlink" title="语义断点切割（核心优化点，区别于简陋滑动分块）"></a>语义断点切割（核心优化点，区别于简陋滑动分块）</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cut := findSplitPoint(runes, start, end)</span><br><span class="line">parts = <span class="built_in">append</span>(parts, strings.TrimSpace(<span class="type">string</span>(runes[start:cut])))</span><br></pre></td></tr></table></figure>
+
+<p>不用粗暴切到 <code>end</code>，而是调用 <code>findSplitPoint</code> 在 <code>[start, end]</code> 内反向查找自然断句点：</p>
+<p>示例：窗口到 512 字符，第 490 位刚好是句号，就切到 490，而不是硬切 512，保证每一块都是完整句子，召回效果大幅提升。</p>
+<h5 id="计算下一轮起始位置-死循环防护（重叠逻辑）"><a href="#计算下一轮起始位置-死循环防护（重叠逻辑）" class="headerlink" title="计算下一轮起始位置 + 死循环防护（重叠逻辑）"></a>计算下一轮起始位置 + 死循环防护（重叠逻辑）</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">next := cut - overlapRunes</span><br><span class="line"><span class="keyword">if</span> next &lt;= start &#123;</span><br><span class="line">	next = cut</span><br><span class="line">&#125;</span><br><span class="line">start = next</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p><code>next := cut - overlapRunes</code>下一个窗口起点 &#x3D; 当前切割位置 - 重叠字符数，实现两块尾部重复一段文本。例：当前切到 490，重叠 64 → 下一轮从 426 开始，426~490 的内容会同时存在两块里。</p>
+</li>
+<li><p>防卡死判断 </p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> next &lt;= start</span><br></pre></td></tr></table></figure>
+
+<p>极端场景：</p>
+<p><code>findSplitPoint</code>返回的 cut 和 start 几乎贴在一起（一整段无任何标点长文本），<code>cut - overlapRunes</code>会小于等于当前 start，窗口无法前进，死循环。</p>
+<p>兜底策略：直接令 <code>next = cut</code>，下一轮从当前切割点开始，不再重叠，强制窗口向前推进。</p>
+</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://LongLongMorty.github.io">LongMorty</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://longlongmorty.github.io/2026/06/20/%E6%99%BA%E8%83%BD%E6%96%87%E4%BB%B6%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%80%EF%BC%89%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E5%A4%84%E7%90%86/">https://longlongmorty.github.io/2026/06/20/%E6%99%BA%E8%83%BD%E6%96%87%E4%BB%B6%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%80%EF%BC%89%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E5%A4%84%E7%90%86/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://LongLongMorty.github.io" target="_blank">LongMorty</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Agent/">Agent</a><a class="post-meta__tags" href="/tags/GO/">GO</a></div><div class="post-share"><div class="social-share" data-image="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260620180956070.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/06/18/Plan-and-Solve%E6%A8%A1%E5%BC%8F/" title="Plan-and-Solve模式"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260618002207769.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Plan-and-Solve模式</div></div><div class="info-2"><div class="info-item-1">Plan-and-Solve模式</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/12/Go%E8%AF%AD%E8%A8%80-Deepseek-API%E5%81%9A%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8Fagent%E6%95%99%E5%AD%A6/" title="Go语言+Deepseek API做一个最小agent教学"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260612214914986.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-12</div><div class="info-item-2">Go语言+Deepseek API做一个最小agent教学</div></div><div class="info-2"><div class="info-item-1">简单介绍Go语言实现最小Agent</div></div></div></a><a class="pagination-related" href="/2026/06/18/Plan-and-Solve%E6%A8%A1%E5%BC%8F/" title="Plan-and-Solve模式"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260618002207769.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-18</div><div class="info-item-2">Plan-and-Solve模式</div></div><div class="info-2"><div class="info-item-1">Plan-and-Solve模式</div></div></div></a><a class="pagination-related" href="/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/" title="GO语言 实现资料研究助手mini Agent"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613221016838.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-13</div><div class="info-item-2">GO语言 实现资料研究助手mini Agent</div></div><div class="info-2"><div class="info-item-1">一个资料研究助手demo项目，输入主题后自动搜索、筛选、总结并输出引用链接。</div></div></div></a><a class="pagination-related" href="/2026/06/13/Learn-Tool-Use-RAG-And-Memory/" title="Learn Tool Use, RAG, And Memory"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613173544233.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-13</div><div class="info-item-2">Learn Tool Use, RAG, And Memory</div></div><div class="info-2"><div class="info-item-1">介绍Agent里面工具、RAG以及Memory部分</div></div></div></a><a class="pagination-related" href="/2026/06/11/Understand-What-An-Agent-Is/" title="Understand What An Agent Is"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260611165812306.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-11</div><div class="info-item-2">Understand What An Agent Is</div></div><div class="info-2"><div class="info-item-1">简单介绍Agent相关的一些内容</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">LongMorty</div><div class="author-info-description">热爱编程，分享技术知识</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">12</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/LongLongMorty"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/LongLongMorty" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:2134693323@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的博客！这里分享我的技术学习笔记和项目经验。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%99%BA%E8%83%BD%E6%96%87%E4%BB%B6%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%80%EF%BC%89%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E5%A4%84%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">智能文件问答系统（一）智能文档处理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PDF%E5%88%B0Markdown%E7%9A%84%E7%BB%9F%E4%B8%80%E8%BD%AC%E6%8D%A2"><span class="toc-number">1.2.</span> <span class="toc-text">PDF到Markdown的统一转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Markdown-%E8%A7%A3%E6%9E%90%E3%80%81%E7%AB%A0%E8%8A%82%E3%80%81%E5%88%86%E5%9D%97"><span class="toc-number">1.3.</span> <span class="toc-text">Markdown 解析、章节、分块</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">1.3.1.</span> <span class="toc-text">1. 核心数据结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-Markdown-%E8%A7%A3%E6%9E%90%E6%B5%81%E7%A8%8B-ParseMarkdown"><span class="toc-number">1.3.2.</span> <span class="toc-text">2. Markdown 解析流程 (ParseMarkdown)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E6%99%BA%E8%83%BD%E9%87%8D%E5%8F%A0%E5%88%87%E7%89%87%E7%AE%97%E6%B3%95-ChunkDocument"><span class="toc-number">1.3.3.</span> <span class="toc-text">3. 智能重叠切片算法 (ChunkDocument)</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BE%AA%E7%8E%AF%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E4%B8%BB%E4%BD%93"><span class="toc-number">1.3.3.1.</span> <span class="toc-text">循环滑动窗口主体</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%AF%AD%E4%B9%89%E6%96%AD%E7%82%B9%E5%88%87%E5%89%B2%EF%BC%88%E6%A0%B8%E5%BF%83%E4%BC%98%E5%8C%96%E7%82%B9%EF%BC%8C%E5%8C%BA%E5%88%AB%E4%BA%8E%E7%AE%80%E9%99%8B%E6%BB%91%E5%8A%A8%E5%88%86%E5%9D%97%EF%BC%89"><span class="toc-number">1.3.3.2.</span> <span class="toc-text">语义断点切割（核心优化点，区别于简陋滑动分块）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E4%B8%8B%E4%B8%80%E8%BD%AE%E8%B5%B7%E5%A7%8B%E4%BD%8D%E7%BD%AE-%E6%AD%BB%E5%BE%AA%E7%8E%AF%E9%98%B2%E6%8A%A4%EF%BC%88%E9%87%8D%E5%8F%A0%E9%80%BB%E8%BE%91%EF%BC%89"><span class="toc-number">1.3.3.3.</span> <span class="toc-text">计算下一轮起始位置 + 死循环防护（重叠逻辑）</span></a></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/06/20/%E6%99%BA%E8%83%BD%E6%96%87%E4%BB%B6%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%80%EF%BC%89%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E5%A4%84%E7%90%86/" title="智能文件问答系统（一）智能文档处理"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260620180956070.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="智能文件问答系统（一）智能文档处理"/></a><div class="content"><a class="title" href="/2026/06/20/%E6%99%BA%E8%83%BD%E6%96%87%E4%BB%B6%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%80%EF%BC%89%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E5%A4%84%E7%90%86/" title="智能文件问答系统（一）智能文档处理">智能文件问答系统（一）智能文档处理</a><time datetime="2026-06-20T10:03:26.000Z" title="发表于 2026-06-20 18:03:26">2026-06-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/18/Plan-and-Solve%E6%A8%A1%E5%BC%8F/" title="Plan-and-Solve模式"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260618002207769.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Plan-and-Solve模式"/></a><div class="content"><a class="title" href="/2026/06/18/Plan-and-Solve%E6%A8%A1%E5%BC%8F/" title="Plan-and-Solve模式">Plan-and-Solve模式</a><time datetime="2026-06-17T16:10:57.000Z" title="发表于 2026-06-18 00:10:57">2026-06-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/" title="GO语言 实现资料研究助手mini Agent"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613221016838.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GO语言 实现资料研究助手mini Agent"/></a><div class="content"><a class="title" href="/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/" title="GO语言 实现资料研究助手mini Agent">GO语言 实现资料研究助手mini Agent</a><time datetime="2026-06-13T14:04:23.000Z" title="发表于 2026-06-13 22:04:23">2026-06-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/13/Learn-Tool-Use-RAG-And-Memory/" title="Learn Tool Use, RAG, And Memory"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613173544233.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Learn Tool Use, RAG, And Memory"/></a><div class="content"><a class="title" href="/2026/06/13/Learn-Tool-Use-RAG-And-Memory/" title="Learn Tool Use, RAG, And Memory">Learn Tool Use, RAG, And Memory</a><time datetime="2026-06-13T09:22:25.000Z" title="发表于 2026-06-13 17:22:25">2026-06-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/12/Go%E8%AF%AD%E8%A8%80-Deepseek-API%E5%81%9A%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8Fagent%E6%95%99%E5%AD%A6/" title="Go语言+Deepseek API做一个最小agent教学"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260612214914986.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Go语言+Deepseek API做一个最小agent教学"/></a><div class="content"><a class="title" href="/2026/06/12/Go%E8%AF%AD%E8%A8%80-Deepseek-API%E5%81%9A%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8Fagent%E6%95%99%E5%AD%A6/" title="Go语言+Deepseek API做一个最小agent教学">Go语言+Deepseek API做一个最小agent教学</a><time datetime="2026-06-12T13:46:14.000Z" title="发表于 2026-06-12 21:46:14">2026-06-12</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By LongMorty</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script src="/js/custom.js"></script><canvas class="fireworks" mobile="true"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      false
+        ? pjax.loadUrl('/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
