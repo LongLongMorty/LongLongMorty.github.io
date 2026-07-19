@@ -1,0 +1,889 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>如何写好 Skill：一份实战经验手册 | LongMorty</title><meta name="author" content="LongMorty"><meta name="copyright" content="LongMorty"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="这篇文章把写 Skill 踩过的坑、总结出的经验，再加上 Anthropic 官方的一些好做法，整理到了一起。希望能帮你少走弯路，把团队积累的知识真正&quot;喂&quot;给 AI，让它干活更靠谱。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何写好 Skill：一份实战经验手册">
+<meta property="og:url" content="https://longlongmorty.github.io/2026/07/19/%E5%A6%82%E4%BD%95%E5%86%99%E5%A5%BD-Skill%EF%BC%9A%E4%B8%80%E4%BB%BD%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C%E6%89%8B%E5%86%8C/index.html">
+<meta property="og:site_name" content="LongMorty">
+<meta property="og:description" content="这篇文章把写 Skill 踩过的坑、总结出的经验，再加上 Anthropic 官方的一些好做法，整理到了一起。希望能帮你少走弯路，把团队积累的知识真正&quot;喂&quot;给 AI，让它干活更靠谱。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260719211645152.png">
+<meta property="article:published_time" content="2026-07-19T13:07:32.000Z">
+<meta property="article:modified_time" content="2026-07-19T13:17:14.467Z">
+<meta property="article:author" content="LongMorty">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Prompt Engineering">
+<meta property="article:tag" content="Skill">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260719211645152.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "如何写好 Skill：一份实战经验手册",
+  "url": "https://longlongmorty.github.io/2026/07/19/%E5%A6%82%E4%BD%95%E5%86%99%E5%A5%BD-Skill%EF%BC%9A%E4%B8%80%E4%BB%BD%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C%E6%89%8B%E5%86%8C/",
+  "image": "https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260719211645152.png",
+  "datePublished": "2026-07-19T13:07:32.000Z",
+  "dateModified": "2026-07-19T13:17:14.467Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "LongMorty",
+      "url": "https://LongLongMorty.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png"><link rel="canonical" href="https://longlongmorty.github.io/2026/07/19/%E5%A6%82%E4%BD%95%E5%86%99%E5%A5%BD-Skill%EF%BC%9A%E4%B8%80%E4%BB%BD%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C%E6%89%8B%E5%86%8C/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '如何写好 Skill：一份实战经验手册',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.1"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">14</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">16</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260719211645152.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" alt="Logo"><span class="site-name">LongMorty</span></a><a class="nav-page-title" href="/"><span class="site-name">如何写好 Skill：一份实战经验手册</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">如何写好 Skill：一份实战经验手册</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">发表于</span><time datetime="2026-07-19T13:07:32.000Z" title="发表于 2026-07-19 21:07:32">2026-07-19</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/AI/">AI</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">6.2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>21分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p><strong>作者</strong>：jackjchou（腾讯技术工程）</p>
+<p>本文示例以 Go 语言为主，兼顾 Python、Java 等语言，所有原则和技巧适用于任何编程语言。</p>
+</blockquote>
+<h2 id="阅读建议"><a href="#阅读建议" class="headerlink" title="阅读建议"></a>阅读建议</h2><p>文章比较长，不同背景的读者可以按需跳读：</p>
+<table>
+<thead>
+<tr>
+<th>你的情况</th>
+<th>推荐阅读路径</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>从没写过 Skill，想快速上手</td>
+<td>一 → 二（重点看 2.5 Quick Start）→ 三 → 八</td>
+</tr>
+<tr>
+<td>写过但效果不好，想提升质量</td>
+<td>三 → 五 → 十二（反模式）→ 十三（检查清单）</td>
+</tr>
+<tr>
+<td>负责团队 Skill 规范和管理</td>
+<td>四 → 七 → 十一 → 十二</td>
+</tr>
+<tr>
+<td>想了解 MCP 和外部服务集成</td>
+<td>六</td>
+</tr>
+<tr>
+<td>Skill 跑不通，想排查问题</td>
+<td>九 → 十</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="一、先搞清楚-Skill-是什么"><a href="#一、先搞清楚-Skill-是什么" class="headerlink" title="一、先搞清楚 Skill 是什么"></a>一、先搞清楚 Skill 是什么</h2><h3 id="1-1-Skill-到底是啥"><a href="#1-1-Skill-到底是啥" class="headerlink" title="1.1 Skill 到底是啥"></a>1.1 Skill 到底是啥</h3><p>说白了，Skill 就是给 AI 编程助手（Claude Code、CodeBuddy 等）”加装”的能力包。本质上，它是一种<strong>结构化的 Prompt Engineering</strong>——通过标准的文件格式，把分散在人脑中的领域知识、操作流程和最佳实践，转化为 AI 可理解、可执行的指令集。</p>
+<p>物理上看，它就是一个文件夹，里面放一个 <code>SKILL.md</code> 文件，再加上一些可选的脚本和参考资料。核心就三样东西：</p>
+<ul>
+<li><strong>指令（Instructions）</strong>：告诉 AI 该怎么干活，按什么步骤来</li>
+<li><strong>上下文（Context）</strong>：给 AI 补课，告诉它你的项目背景、团队规范这些它不可能凭空知道的东西</li>
+<li><strong>工具（Tools）</strong>：一些辅助脚本、配置模板，AI 可以直接拿来用</li>
+</ul>
+<p>打个比方：裸着的 AI 就像一个刚入职的新人，啥都得问；装了 Skill 之后，就像拿到了老员工整理的操作手册，照着就能干。</p>
+<h3 id="1-2-为什么要写-Skill"><a href="#1-2-为什么要写-Skill" class="headerlink" title="1.2 为什么要写 Skill"></a>1.2 为什么要写 Skill</h3><table>
+<thead>
+<tr>
+<th>痛点</th>
+<th>实际表现</th>
+<th>Skill 怎么解决</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>知识太散</td>
+<td>经验藏在 TAPD、Wiki、代码注释、甚至某个人的脑子里</td>
+<td>全部整理进 Skill，将知识结构化封装为标准技能包</td>
+</tr>
+<tr>
+<td>重复搬砖</td>
+<td>同样的活反复干，每次都要手动来一遍</td>
+<td>写成 Skill 让 AI 自动跑</td>
+</tr>
+<tr>
+<td>做出来的东西不统一</td>
+<td>张三做一个样，李四做另一个样</td>
+<td>用 Skill 固定流程，谁来做都一个标准</td>
+</tr>
+<tr>
+<td>新人上手慢</td>
+<td>来个新人得教半天，对方还不一定记得住</td>
+<td>Skill 本身就是最好的培训材料</td>
+</tr>
+<tr>
+<td>人走知识也走</td>
+<td>核心成员一离职，很多”部落知识”就没了</td>
+<td>把经验沉淀进 Skill，知识完整留存</td>
+</tr>
+</tbody></table>
+<h3 id="1-3-Skill-怎么运作的"><a href="#1-3-Skill-怎么运作的" class="headerlink" title="1.3 Skill 怎么运作的"></a>1.3 Skill 怎么运作的</h3><p>Anthropic 设计了一个”渐进式加载”机制，分成三层：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Level 1: 元数据（name + description）    → 始终驻留在 AI 上下文中</span><br><span class="line">Level 2: SKILL.md 主体                  → Skill 被匹配触发时加载</span><br><span class="line">Level 3: 附带的脚本和参考资料              → 执行过程中按需引用</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>加载时机</th>
+<th>内容要求</th>
+<th>Token 成本参考</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Level 1</td>
+<td>常驻（每次对话都在）</td>
+<td>name + description，控制在 100 字以内</td>
+<td>约 50-150 Token &#x2F; 个 Skill</td>
+</tr>
+<tr>
+<td>Level 2</td>
+<td>匹配触发时一次性加载</td>
+<td>SKILL.md 正文，建议不超过 500 行</td>
+<td>约 2,000-5,000 Token</td>
+</tr>
+<tr>
+<td>Level 3</td>
+<td>执行中按需读取</td>
+<td>脚本、参考文档、模板等</td>
+<td>按实际引用大小计算</td>
+</tr>
+</tbody></table>
+<p>为什么要关注 Token 成本？因为 <strong>Skill 不是免费的</strong>——每加载一个 Skill 都会占用上下文窗口。假设你装了 20 个 Skill，光 Level 1 就要吃掉 1,000-3,000 Token；如果 AI 一次触发了 2 个 Skill，Level 2 又要再加 4,000-10,000 Token。上下文越满，AI 的注意力越分散，回答质量反而可能下降。</p>
+<blockquote>
+<p><strong>核心原则</strong>：Level 1 越精准越好（决定触发时机），Level 2 越精简越好（减少 Token 消耗），Level 3 放心放（按需加载不占常驻空间）。</p>
+</blockquote>
+<p><strong>Skill 的触发模式</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>触发模式</th>
+<th>说明</th>
+<th>典型场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>自动触发</td>
+<td>AI 根据 description 语义匹配，自动决定是否加载</td>
+<td>用户正常提问，AI 判断相关则触发</td>
+</tr>
+<tr>
+<td>手动触发</td>
+<td>用户主动通过命令（如 &#x2F;skill xxx）指定使用</td>
+<td>需要精确控制使用哪个 Skill 时</td>
+</tr>
+<tr>
+<td>规则触发</td>
+<td>基于文件类型、目录、特定操作等条件自动触发</td>
+<td>打开 .go 文件时自动加载 Go 相关 Skill</td>
+</tr>
+</tbody></table>
+<h3 id="1-4-Skill-能用在哪些场景"><a href="#1-4-Skill-能用在哪些场景" class="headerlink" title="1.4 Skill 能用在哪些场景"></a>1.4 Skill 能用在哪些场景</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>比如说……</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>代码迁移&#x2F;改造</td>
+<td>框架升级、换 API、架构重构这些</td>
+</tr>
+<tr>
+<td>代码审查</td>
+<td>按团队规范自动跑一遍 Review，直接出报告</td>
+</tr>
+<tr>
+<td>写文档</td>
+<td>按固定格式生成 API 文档、使用说明等</td>
+</tr>
+<tr>
+<td>项目初始化</td>
+<td>按团队模板一键搭好项目骨架、配好 CI&#x2F;CD</td>
+</tr>
+<tr>
+<td>自动化测试</td>
+<td>根据接口定义自动生成测试用例</td>
+</tr>
+<tr>
+<td>数据处理</td>
+<td>数据库变更、Excel 分析、日志解析这些体力活</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="二、Skill-长什么样"><a href="#二、Skill-长什么样" class="headerlink" title="二、Skill 长什么样"></a>二、Skill 长什么样</h2><h3 id="2-1-最基本的样子"><a href="#2-1-最基本的样子" class="headerlink" title="2.1 最基本的样子"></a>2.1 最基本的样子</h3><p>最简版的 Skill 就是一个文件夹加一个 <code>SKILL.md</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">my-skill/</span><br><span class="line">└── SKILL.md          # 核心配置文件（必需）</span><br></pre></td></tr></table></figure>
+
+<p>如果场景复杂一些，可以加更多东西进去：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">my-skill/</span><br><span class="line">├── SKILL.md              # 核心指令文件（必需）</span><br><span class="line">├── scripts/              # 可执行脚本（可选）</span><br><span class="line">│   ├── check.sh</span><br><span class="line">│   └── transform.py</span><br><span class="line">├── references/           # 参考文档（可选）</span><br><span class="line">│   ├── api-spec.md</span><br><span class="line">│   └── style-guide.md</span><br><span class="line">└── assets/               # 静态资源（可选）</span><br><span class="line">    └── template.json</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-SKILL-md-里面写什么"><a href="#2-2-SKILL-md-里面写什么" class="headerlink" title="2.2 SKILL.md 里面写什么"></a>2.2 SKILL.md 里面写什么</h3><p><code>SKILL.md</code> 分两部分：上面是一段 <strong>YAML 头信息</strong>（告诉系统这个 Skill 叫什么、干什么），下面是 <strong>Markdown 正文</strong>（具体的指令和说明）。</p>
+<p><strong>YAML 头信息部分</strong>：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">name:</span> <span class="string">my-skill-name</span>           <span class="comment"># 必需：唯一标识符，小写，用连字符分隔</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">&gt;</span>                 <span class="comment"># 必需：清晰描述功能和触发场景</span></span><br><span class="line">  <span class="string">将项目中的旧版</span> <span class="string">HTTP</span> <span class="string">客户端迁移到新版统一请求库。</span></span><br><span class="line">  <span class="string">适用于</span> <span class="string">Go</span> <span class="string">项目中使用了</span> <span class="string">old-http-client</span> <span class="string">模块，</span></span><br><span class="line">  <span class="string">需要替换为</span> <span class="string">unified-httpclient</span> <span class="string">的场景。</span></span><br><span class="line"><span class="attr">license:</span> <span class="string">MIT</span>                   <span class="comment"># 可选：许可证</span></span><br><span class="line"><span class="attr">metadata:</span>                      <span class="comment"># 可选：扩展元数据</span></span><br><span class="line">  <span class="attr">author:</span> <span class="string">TeamName</span></span><br><span class="line">  <span class="attr">version:</span> <span class="string">&quot;1.0&quot;</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Markdown 正文参考结构</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"># Skill 名称</span><br><span class="line"></span><br><span class="line">## 概述</span><br><span class="line">描述 Skill 的目的、适用场景和核心价值。</span><br><span class="line"></span><br><span class="line">## 前置条件</span><br><span class="line">执行前需要满足的条件和检查步骤。</span><br><span class="line"></span><br><span class="line">## 处理步骤</span><br><span class="line">### Step 1: xxx</span><br><span class="line">### Step 2: xxx</span><br><span class="line"></span><br><span class="line">## 代码示例</span><br><span class="line">Before/After 对比或 Few-Shot 示例。</span><br><span class="line"></span><br><span class="line">## 验证清单</span><br><span class="line">- [ ] 检查项 1</span><br><span class="line">- [ ] 检查项 2</span><br><span class="line"></span><br><span class="line">## 常见问题</span><br><span class="line">### Q: xxx？</span><br><span class="line">A: xxx</span><br><span class="line"></span><br><span class="line">## 相关 Skill</span><br><span class="line">- [相关 Skill 名称](链接)</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-放在哪里"><a href="#2-3-放在哪里" class="headerlink" title="2.3 放在哪里"></a>2.3 放在哪里</h3><table>
+<thead>
+<tr>
+<th>位置</th>
+<th>路径</th>
+<th>作用范围</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>用户级</td>
+<td>~&#x2F;.claude&#x2F;skills&#x2F; 或 ~&#x2F;.codebuddy&#x2F;skills&#x2F;</td>
+<td>所有项目</td>
+</tr>
+<tr>
+<td>项目级</td>
+<td>项目根目录&#x2F;.claude&#x2F;skills&#x2F; 或 .codebuddy&#x2F;skills&#x2F;</td>
+<td>当前项目</td>
+</tr>
+</tbody></table>
+<h3 id="2-4-Skill-和-Rule-有什么区别"><a href="#2-4-Skill-和-Rule-有什么区别" class="headerlink" title="2.4 Skill 和 Rule 有什么区别"></a>2.4 Skill 和 Rule 有什么区别</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Rule</th>
+<th>Skill</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>定位</td>
+<td>全局约束，始终生效</td>
+<td>按需触发的能力包</td>
+</tr>
+<tr>
+<td>加载方式</td>
+<td>每次对话都自动加载</td>
+<td>匹配用户意图时才加载</td>
+</tr>
+<tr>
+<td>典型内容</td>
+<td>编码规范、安全红线、代码风格</td>
+<td>迁移流程、审查模板、项目初始化</td>
+</tr>
+<tr>
+<td>长度</td>
+<td>宜短（始终占用上下文）</td>
+<td>可长（触发时才占用）</td>
+</tr>
+<tr>
+<td>触发条件</td>
+<td>无需触发，始终生效</td>
+<td>依赖 description 匹配</td>
+</tr>
+<tr>
+<td>文件格式</td>
+<td>.md 放在 rules 目录</td>
+<td>SKILL.md 放在 skills 目录</td>
+</tr>
+</tbody></table>
+<p><strong>选择建议</strong>：</p>
+<ul>
+<li>所有对话都该遵守的（如”SQL 必须参数化”、”提交信息用英文”）→ 写 <strong>Rule</strong></li>
+<li>特定任务才需要的（如”从 v2 迁移到 v3”、”生成 API 文档”）→ 写 <strong>Skill</strong></li>
+</ul>
+<h3 id="2-5-Quick-Start：5-分钟写出你的第一个-Skill"><a href="#2-5-Quick-Start：5-分钟写出你的第一个-Skill" class="headerlink" title="2.5 Quick Start：5 分钟写出你的第一个 Skill"></a>2.5 Quick Start：5 分钟写出你的第一个 Skill</h3><p>以”自动生成 Go 单元测试”为例：</p>
+<p><strong>第一步</strong>：创建目录和文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p ~/.codebuddy/skills/go-test-gen</span><br><span class="line"><span class="built_in">touch</span> ~/.codebuddy/skills/go-test-gen/SKILL.md</span><br></pre></td></tr></table></figure>
+
+<p><strong>第二步</strong>：写入以下内容</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">name: go-test-gen</span><br><span class="line">description: &gt;</span><br><span class="line">  为 Go 函数自动生成表驱动的单元测试。</span><br><span class="line">  当用户要求编写测试、生成测试用例或补充单测时触发。</span><br><span class="line">  适用于所有 Go 项目。</span><br><span class="line">metadata:</span><br><span class="line"><span class="section">  version: &quot;1.0&quot;</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line"><span class="section"># Go 单元测试生成</span></span><br><span class="line"></span><br><span class="line"><span class="section">## 目标</span></span><br><span class="line">为指定的 Go 函数生成表驱动（table-driven）风格的单元测试。</span><br><span class="line"></span><br><span class="line"><span class="section">## 规则</span></span><br><span class="line"><span class="bullet">1.</span> 使用 testing 标准库，不引入第三方测试框架</span><br><span class="line"><span class="bullet">2.</span> 测试函数命名为 TestXxx，与被测函数对应</span><br><span class="line"><span class="bullet">3.</span> 使用 t.Run 子测试 + 表驱动模式</span><br><span class="line"><span class="bullet">4.</span> 覆盖：正常输入、边界值、错误输入 三类场景</span><br><span class="line"></span><br><span class="line">[示例、验证等略 —— 详见完整 SKILL.md]</span><br></pre></td></tr></table></figure>
+
+<p><strong>第三步</strong>：试一试</p>
+<p>在对话中输入：”帮我为 <code>pkg/utils/math.go</code> 里的函数写单元测试”——AI 应该会自动触发这个 Skill。</p>
+<p>这就是一个完整的 Skill。</p>
+<hr>
+<h2 id="三、写出好-Skill-的关键技巧"><a href="#三、写出好-Skill-的关键技巧" class="headerlink" title="三、写出好 Skill 的关键技巧"></a>三、写出好 Skill 的关键技巧</h2><h3 id="3-1-Description-写好了，一切就成功了一半"><a href="#3-1-Description-写好了，一切就成功了一半" class="headerlink" title="3.1 Description 写好了，一切就成功了一半"></a>3.1 Description 写好了，一切就成功了一半</h3><p>Description 太重要了。AI 就是靠它来判断”用户现在说的这个事，该不该用这个 Skill”。</p>
+<p><strong>反面案例</strong> ❌：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">description: 处理代码迁移</span><br></pre></td></tr></table></figure>
+
+<p><strong>正面案例</strong> ✅：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">description: &gt;</span><br><span class="line">  将项目中的旧版 HTTP 客户端迁移到新版统一请求库。</span><br><span class="line">  适用于 Go 项目中使用了 old-http-client 模块，</span><br><span class="line">  需要替换为 unified-httpclient 的场景。</span><br><span class="line">  包含 import 路径替换、请求参数适配和错误处理改造。</span><br></pre></td></tr></table></figure>
+
+<p><strong>实用技巧</strong>：”触发评估”——你可以自己想 20 个问题（一半该触发、一半不该触发），然后测试一下 AI 是不是每次都能正确判断。</p>
+<h3 id="3-2-开头就说清楚：做什么、为什么、要不要做"><a href="#3-2-开头就说清楚：做什么、为什么、要不要做" class="headerlink" title="3.2 开头就说清楚：做什么、为什么、要不要做"></a>3.2 开头就说清楚：做什么、为什么、要不要做</h3><p>别让 AI 猜你的意图。每个 Skill 上来就该把三件事说明白：<strong>做什么、为什么、怎么判断是否需要做</strong>。</p>
+<p>要点：</p>
+<ol>
+<li><strong>把起点和终点说清楚</strong>——从哪迁到哪，别含糊</li>
+<li><strong>告诉 AI 什么时候不用做</strong>——给个前置检查条件，及时跳过</li>
+<li><strong>给出具体的检查命令</strong>，而非模糊描述</li>
+</ol>
+<h3 id="3-3-用祈使句下指令，解释”为什么”"><a href="#3-3-用祈使句下指令，解释”为什么”" class="headerlink" title="3.3 用祈使句下指令，解释”为什么”"></a>3.3 用祈使句下指令，解释”为什么”</h3><p><strong>第一，别用商量的口吻，直接说”做什么”</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># ❌ 不推荐</span><br><span class="line">你应该检查 Go 版本，然后你需要选择合适的方案。</span><br><span class="line"></span><br><span class="line"># ✅ 推荐</span><br><span class="line">检查 Go 版本。根据版本号选择对应方案：</span><br><span class="line">- Go &lt; 1.18 → 使用 interface&#123;&#125; 做泛型替代</span><br><span class="line">- Go &gt;= 1.18 → 使用原生泛型（type parameters）</span><br></pre></td></tr></table></figure>
+
+<p><strong>第二，与其一堆”MUST”，不如讲清楚为什么</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># ❌ 不推荐</span><br><span class="line">必须使用参数化查询。绝对不能拼接字符串。必须验证所有输入。</span><br><span class="line"></span><br><span class="line"># ✅ 推荐</span><br><span class="line">使用参数化查询而非字符串拼接来构建 SQL。</span><br><span class="line">字符串拼接会导致 SQL 注入漏洞——攻击者可以通过输入</span><br><span class="line">`&#x27;; DROP TABLE users; --` 来删除整张表。</span><br></pre></td></tr></table></figure>
+
+<p>AI 要是理解了背后的道理，遇到你没想到的情况也能做出合理判断。</p>
+<h3 id="3-4-给出”改之前-vs-改之后”的对比"><a href="#3-4-给出”改之前-vs-改之后”的对比" class="headerlink" title="3.4 给出”改之前 vs 改之后”的对比"></a>3.4 给出”改之前 vs 改之后”的对比</h3><p>这是 Skill 中最关键的部分——让 AI 清楚知道”改什么”和”改成什么”。</p>
+<p><strong>方式一：注释标注（适合简单变更）</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Before</span></span><br><span class="line"><span class="keyword">import</span> oldhttp <span class="string">&quot;github.com/example/old-http-client&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// After</span></span><br><span class="line"><span class="keyword">import</span> uhttp <span class="string">&quot;github.com/example/unified-httpclient&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>方式二：完整文件对比（适合复杂变更）</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Before (pkg/request/client.go)</span></span><br><span class="line"><span class="keyword">package</span> request</span><br><span class="line"><span class="keyword">import</span> oldhttp <span class="string">&quot;github.com/example/old-http-client&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MakeRequest</span><span class="params">(service, action <span class="type">string</span>, data <span class="keyword">map</span>[<span class="type">string</span>]<span class="keyword">interface</span>&#123;&#125;)</span></span> (*oldhttp.Response, <span class="type">error</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> oldhttp.Do(&amp;oldhttp.Request&#123;Service: service, Action: action, Data: data&#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// After (pkg/request/client.go)</span></span><br><span class="line"><span class="keyword">package</span> request</span><br><span class="line"><span class="keyword">import</span> uhttp <span class="string">&quot;github.com/example/unified-httpclient&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MakeRequest</span><span class="params">(service, action <span class="type">string</span>, data <span class="keyword">map</span>[<span class="type">string</span>]<span class="keyword">interface</span>&#123;&#125;)</span></span> (*uhttp.Response, <span class="type">error</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> uhttp.Do(&amp;uhttp.Request&#123;Service: service, Action: action, Data: data&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>方式三：Diff 格式（推荐，最直观）</strong></p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--- a/pkg/request/client.go</span></span><br><span class="line"><span class="comment">+++ b/pkg/request/client.go</span></span><br><span class="line"><span class="meta">@@ -3,7 +3,7 @@</span></span><br><span class="line"> package request</span><br><span class="line"> </span><br><span class="line"><span class="deletion">-import oldhttp &quot;github.com/example/old-http-client&quot;</span></span><br><span class="line"><span class="addition">+import uhttp &quot;github.com/example/unified-httpclient&quot;</span></span><br><span class="line"> </span><br><span class="line"><span class="deletion">- return oldhttp.Do(</span></span><br><span class="line"><span class="addition">+ return uhttp.Do(</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-5-Few-Shot，多给几个例子，AI-就不会瞎发挥"><a href="#3-5-Few-Shot，多给几个例子，AI-就不会瞎发挥" class="headerlink" title="3.5 Few-Shot，多给几个例子，AI 就不会瞎发挥"></a>3.5 Few-Shot，多给几个例子，AI 就不会瞎发挥</h3><p>在 Skill 里放 3-5 个高质量的输入&#x2F;输出示例，AI 的表现会稳定很多。光靠文字描述，AI 可能理解偏了；但给了具体的示例，它就知道”哦，原来你要的是这个效果”。</p>
+<p><strong>关键原则</strong>：</p>
+<ul>
+<li><strong>覆盖典型场景</strong>：正常情况、边界情况、错误情况各来一个</li>
+<li><strong>输入输出成对出现</strong>：每个示例都要有”给什么”和”出什么”</li>
+<li><strong>示例之间有差异</strong>：别搞 3 个长得差不多的，要能展示不同的处理分支</li>
+<li><strong>先放最典型的</strong>：AI 会更倾向于模仿前面的示例，把最常见的场景放第一个</li>
+</ul>
+<h3 id="3-6-善用可视化：决策树与流程图"><a href="#3-6-善用可视化：决策树与流程图" class="headerlink" title="3.6 善用可视化：决策树与流程图"></a>3.6 善用可视化：决策树与流程图</h3><p>复杂流程光靠文字描述，不管是人还是 AI 都容易看晕。用表格或者流程图把不同情况列出来，AI 就不容易搞混。</p>
+<p><strong>决策流程图</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">输入：待处理的 import 语句</span><br><span class="line">         ↓</span><br><span class="line">  是否为直接 import？ ──── 是 → 自动替换 import 路径</span><br><span class="line">         ↓ 否</span><br><span class="line">  是否为别名 import？ ──── 是 → 替换路径，保留别名</span><br><span class="line">         ↓ 否</span><br><span class="line">  是否为点导入？ ────── 是 → 替换路径，检查符号冲突</span><br><span class="line">         ↓ 否</span><br><span class="line">  标记为需手动处理 → 输出待处理清单供开发者确认</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="四、Skill-太长了怎么办——拆（模块化）"><a href="#四、Skill-太长了怎么办——拆（模块化）" class="headerlink" title="四、Skill 太长了怎么办——拆（模块化）"></a>四、Skill 太长了怎么办——拆（模块化）</h2><h3 id="4-1-什么时候该拆"><a href="#4-1-什么时候该拆" class="headerlink" title="4.1 什么时候该拆"></a>4.1 什么时候该拆</h3><ul>
+<li>文件写着写着超过 500 行了（Anthropic 建议的上限）</li>
+<li>包含多个可独立的工作流程</li>
+<li>有些步骤可以单独用，没必要每次都把整个 Skill 跑一遍</li>
+<li>不同部分改动频率差很多</li>
+</ul>
+<h3 id="4-2-拆成什么样——模块化设计"><a href="#4-2-拆成什么样——模块化设计" class="headerlink" title="4.2 拆成什么样——模块化设计"></a>4.2 拆成什么样——模块化设计</h3><p><strong>复杂场景：拆成主 Skill + 子 Skill</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">project-migration/                  # 主 Skill：流程总览与编排</span><br><span class="line">├── SKILL.md</span><br><span class="line">└── steps/</span><br><span class="line">    ├── 00-environment-setup.md</span><br><span class="line">    ├── 01-dependency-update.md</span><br><span class="line">    └── 02-api-migration.md</span><br><span class="line"></span><br><span class="line">project-migration-sub-env-setup/    # 子 Skill：可独立调用</span><br><span class="line">├── SKILL.md</span><br><span class="line">└── scripts/</span><br><span class="line">    └── check-env.sh</span><br><span class="line"></span><br><span class="line">project-migration-sub-api-migrate/  # 子 Skill：可独立调用</span><br><span class="line">├── SKILL.md</span><br><span class="line">└── references/</span><br><span class="line">    └── api-mapping.json</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-拆分的几个原则"><a href="#4-3-拆分的几个原则" class="headerlink" title="4.3 拆分的几个原则"></a>4.3 拆分的几个原则</h3><ol>
+<li><strong>一个子 Skill 只管一件事（单一职责）</strong></li>
+<li><strong>把依赖关系写明白</strong>——子 Skill 之间有先后顺序的，在文档里写清楚</li>
+<li><strong>每个子 Skill 都能单独使用</strong>——拆出来的子 Skill 不应该离了主流程就没法跑</li>
+</ol>
+<hr>
+<h2 id="五、一些进阶的写法"><a href="#五、一些进阶的写法" class="headerlink" title="五、一些进阶的写法"></a>五、一些进阶的写法</h2><h3 id="5-1-能用表格就用表格"><a href="#5-1-能用表格就用表格" class="headerlink" title="5.1 能用表格就用表格"></a>5.1 能用表格就用表格</h3><p>AI 读表格比读大段文字准确得多。能结构化的信息，尽量用表格呈现。</p>
+<h3 id="5-2-复杂检查逻辑？写成脚本"><a href="#5-2-复杂检查逻辑？写成脚本" class="headerlink" title="5.2 复杂检查逻辑？写成脚本"></a>5.2 复杂检查逻辑？写成脚本</h3><p>如果前置检查或配置流程比较复杂，别全堆在 SKILL.md 里，写成脚本放到 <code>scripts/</code> 目录下，SKILL.md 里直接调用。</p>
+<h3 id="5-3-提供多种方案适配不同场景"><a href="#5-3-提供多种方案适配不同场景" class="headerlink" title="5.3 提供多种方案适配不同场景"></a>5.3 提供多种方案适配不同场景</h3><p>同样的目标，不同项目的结构可能完全不一样。多准备几种方案，让 AI 根据实际情况选合适的：</p>
+<ul>
+<li><strong>方案 A：集中式请求封装</strong>（推荐）——适用于项目有统一请求工具函数</li>
+<li><strong>方案 B：分散式直接调用</strong>——适用于各模块直接引用旧包，无统一封装</li>
+<li><strong>方案 C：渐进式迁移</strong>——适用于大型项目，无法一次性完成迁移</li>
+</ul>
+<h3 id="5-4-把容易踩的坑标出来"><a href="#5-4-把容易踩的坑标出来" class="headerlink" title="5.4 把容易踩的坑标出来"></a>5.4 把容易踩的坑标出来</h3><p>AI 也会犯错，特别是一些人类凭经验才能避开的坑。在 Skill 里显眼地标出来，能省很多事。</p>
+<h3 id="5-5-FAQ-不是摆设"><a href="#5-5-FAQ-不是摆设" class="headerlink" title="5.5 FAQ 不是摆设"></a>5.5 FAQ 不是摆设</h3><p>写得好的 FAQ 能帮 AI 处理那些”说不清道不明”的边界情况。</p>
+<hr>
+<h2 id="六、要调外部服务？MCP-vs-HTTP"><a href="#六、要调外部服务？MCP-vs-HTTP" class="headerlink" title="六、要调外部服务？MCP vs HTTP"></a>六、要调外部服务？MCP vs HTTP</h2><h3 id="6-1-它们的区别在哪"><a href="#6-1-它们的区别在哪" class="headerlink" title="6.1 它们的区别在哪"></a>6.1 它们的区别在哪</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>MCP 调用</th>
+<th>HTTP&#x2F;API 直接调用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>本质定位</td>
+<td>AI Agent 的标准化工具协议，专为 LLM 设计</td>
+<td>通用网络通信协议</td>
+</tr>
+<tr>
+<td>传输方式</td>
+<td>JSON-RPC 2.0 over stdio &#x2F; SSE</td>
+<td>HTTP&#x2F;HTTPS REST&#x2F;GraphQL</td>
+</tr>
+<tr>
+<td>上下文感知</td>
+<td>原生支持流式传输和 AI 对话上下文</td>
+<td>无状态 Request-Response</td>
+</tr>
+<tr>
+<td>调用方式</td>
+<td>AI 自动识别并调用已注册的 MCP 工具</td>
+<td>需在脚本中手动编写请求代码</td>
+</tr>
+<tr>
+<td>鉴权管理</td>
+<td>MCP Server 统一管理</td>
+<td>每个脚本自行处理 Token&#x2F;Key</td>
+</tr>
+<tr>
+<td>跨平台复用</td>
+<td>一次注册，多平台均可调用</td>
+<td>绑定特定脚本语言和运行环境</td>
+</tr>
+</tbody></table>
+<h3 id="6-2-怎么选"><a href="#6-2-怎么选" class="headerlink" title="6.2 怎么选"></a>6.2 怎么选</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">需要调用外部服务</span><br><span class="line">         ↓</span><br><span class="line">  该服务是否已有 MCP Server？ ──── 是 → 优先使用 MCP</span><br><span class="line">         ↓ 否</span><br><span class="line">  是否需要被多个 Skill / 平台复用？ ──── 是 → 封装为 MCP Server</span><br><span class="line">         ↓ 否</span><br><span class="line">  是否需要统一的鉴权和安全管控？ ──── 是 → 封装为 MCP Server</span><br><span class="line">         ↓ 否</span><br><span class="line">  是否为简单的一次性调用？ ──── 是 → 脚本中直接 HTTP 调用</span><br><span class="line">         ↓ 否</span><br><span class="line">  评估改造成本 → 成本可接受则封装 MCP，否则先用 HTTP 脚本过渡</span><br></pre></td></tr></table></figure>
+
+<p><strong>MCP 管连接，Skill 管流程，HTTP 脚本兜底处理 MCP 顾不上的场景。</strong></p>
+<hr>
+<h2 id="七、安全意识：别让-Skill-变成漏洞入口"><a href="#七、安全意识：别让-Skill-变成漏洞入口" class="headerlink" title="七、安全意识：别让 Skill 变成漏洞入口"></a>七、安全意识：别让 Skill 变成漏洞入口</h2><h3 id="7-1-绝不硬编码敏感信息"><a href="#7-1-绝不硬编码敏感信息" class="headerlink" title="7.1 绝不硬编码敏感信息"></a>7.1 绝不硬编码敏感信息</h3><p>永远通过<strong>环境变量</strong>或<strong>配置文件（加入 .gitignore）</strong> 来管理。</p>
+<h3 id="7-2-危险操作必须加确认"><a href="#7-2-危险操作必须加确认" class="headerlink" title="7.2 危险操作必须加确认"></a>7.2 危险操作必须加确认</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># ✅ 先列出来，让用户确认</span><br><span class="line">echo &quot;即将删除以下目录：&quot;</span><br><span class="line">echo &quot;  /data/old-backup/&quot;</span><br><span class="line">read -p &quot;确认删除？(y/N) &quot; confirm</span><br><span class="line">if [ &quot;$confirm&quot; != &quot;y&quot; ]; then</span><br><span class="line">  echo &quot;已取消&quot;</span><br><span class="line">  exit 0</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-3-数据库操作先备份再改"><a href="#7-3-数据库操作先备份再改" class="headerlink" title="7.3 数据库操作先备份再改"></a>7.3 数据库操作先备份再改</h3><h3 id="7-4-防范-Prompt-注入"><a href="#7-4-防范-Prompt-注入" class="headerlink" title="7.4 防范 Prompt 注入"></a>7.4 防范 Prompt 注入</h3><blockquote>
+<p><strong>核心原则</strong>：区分”指令”和”数据”。Skill 中的步骤是指令，从外部读取的内容是数据。数据永远不应该被当成指令来执行。</p>
+</blockquote>
+<h3 id="7-5-安全检查清单"><a href="#7-5-安全检查清单" class="headerlink" title="7.5 安全检查清单"></a>7.5 安全检查清单</h3><ul>
+<li><input disabled="" type="checkbox"> 文件中没有硬编码的密钥、密码、Token</li>
+<li><input disabled="" type="checkbox"> 危险操作（删除、覆盖、DDL）有确认或备份机制</li>
+<li><input disabled="" type="checkbox"> 脚本中的用户输入做了校验，不会被注入</li>
+<li><input disabled="" type="checkbox"> 文件路径操作没有使用未经验证的变量拼接</li>
+<li><input disabled="" type="checkbox"> 网络请求使用了 HTTPS，并设置了合理的超时</li>
+</ul>
+<hr>
+<h2 id="八、用-Skill-Creator-帮你写-Skill（含工程化评估）"><a href="#八、用-Skill-Creator-帮你写-Skill（含工程化评估）" class="headerlink" title="八、用 Skill Creator 帮你写 Skill（含工程化评估）"></a>八、用 Skill Creator 帮你写 Skill（含工程化评估）</h2><p>Skill Creator 是 Anthropic 官方出的一个”帮你写 Skill 的 Skill”——用对话的方式引导你一步步把 Skill 做出来，还能自动测试和优化。</p>
+<h3 id="8-1-核心工作流程"><a href="#8-1-核心工作流程" class="headerlink" title="8.1 核心工作流程"></a>8.1 核心工作流程</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────────────────────────────────────────────────┐</span><br><span class="line">│              Skill Creator 工作流程                       │</span><br><span class="line">├──────────────────────────────────────────────────────────┤</span><br><span class="line">│  Step 1: 定义意图                                        │</span><br><span class="line">│  ├── 用大白话描述 Skill 要做什么                         │</span><br><span class="line">│  └── Skill Creator 会追问细节（格式、规范、示例等）      │</span><br><span class="line">│                       ↓                                  │</span><br><span class="line">│  Step 2: 生成草稿                                        │</span><br><span class="line">│  ├── 自动生成 SKILL.md（含 YAML 元数据 + Markdown 指令） │</span><br><span class="line">│  └── 可同时生成 scripts/ 和 references/                  │</span><br><span class="line">│                       ↓                                  │</span><br><span class="line">│  Step 3: 对比测试                                        │</span><br><span class="line">│  ├── 提供 2-3 个测试用例                                 │</span><br><span class="line">│  ├── 并发运行&quot;有 Skill&quot;和&quot;无 Skill&quot;两组对比              │</span><br><span class="line">│  └── 自动评分，生成通过率和 Token 消耗报告               │</span><br><span class="line">│                       ↓                                  │</span><br><span class="line">│  Step 4: 反馈迭代                                        │</span><br><span class="line">│  ├── 哪里不满意直接说                                    │</span><br><span class="line">│  └── Skill Creator 自动调整并重测                        │</span><br><span class="line">│                       ↓                                  │</span><br><span class="line">│  Step 5: 工程化评估（新增）                               │</span><br><span class="line">│  ├── 自动生成触发评估用例（正例 + 反例 + 边界）          │</span><br><span class="line">│  ├── 批量运行，输出触发准确率和召回率报告                │</span><br><span class="line">│  └── 输出综合评估报告，标注薄弱环节和优化建议            │</span><br><span class="line">└──────────────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-2-工程化评估"><a href="#8-2-工程化评估" class="headerlink" title="8.2 工程化评估"></a>8.2 工程化评估</h3><p><strong>触发评估</strong>：解决的是”Description 写得好不好”这个问题。自动生成正例和反例，批量测试触发准确率。</p>
+<p><strong>效果评估</strong>：准备一批有评分标准的测试用例，让 Skill 实际跑一遍再自动打分。</p>
+<p><strong>评估达标的参考标准</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>达标线</th>
+<th>优秀线</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>触发准确率（Precision）</td>
+<td>≥ 85%</td>
+<td>≥ 95%</td>
+</tr>
+<tr>
+<td>触发召回率（Recall）</td>
+<td>≥ 85%</td>
+<td>≥ 95%</td>
+</tr>
+<tr>
+<td>效果通过率</td>
+<td>≥ 80%</td>
+<td>≥ 90%</td>
+</tr>
+<tr>
+<td>相对提升率</td>
+<td>≥ 30%</td>
+<td>≥ 50%</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>小贴士</strong>：如果 Skill 是团队共享的，建议在 PR Review 时要求附带评估报告。就像代码变更要跑单测一样，Skill 变更也应该跑评估——这就是”Skill 的单元测试”。</p>
+</blockquote>
+<hr>
+<h2 id="九、做完了怎么验证"><a href="#九、做完了怎么验证" class="headerlink" title="九、做完了怎么验证"></a>九、做完了怎么验证</h2><h3 id="9-1-列清单验证"><a href="#9-1-列清单验证" class="headerlink" title="9.1 列清单验证"></a>9.1 列清单验证</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">## 验证清单</span><br><span class="line"></span><br><span class="line">### 功能验证</span><br><span class="line">- [ ] 所有旧版 import 路径已替换</span><br><span class="line">- [ ] 新版客户端模块已添加到 go.mod</span><br><span class="line">- [ ] 旧版客户端模块已从 go.mod 移除</span><br><span class="line">- [ ] `go vet ./...` 无警告</span><br><span class="line"></span><br><span class="line">### 构建验证</span><br><span class="line">- [ ] 开发环境编译正常</span><br><span class="line">- [ ] 单元测试全部通过</span><br><span class="line">- [ ] 编译产物中不包含旧版包的引用</span><br><span class="line"></span><br><span class="line">### 运行验证</span><br><span class="line">- [ ] 核心接口请求正常</span><br><span class="line">- [ ] 错误处理逻辑正常</span><br><span class="line">- [ ] 超时和重试机制正常</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-2-提供验证命令"><a href="#9-2-提供验证命令" class="headerlink" title="9.2 提供验证命令"></a>9.2 提供验证命令</h3><p>光有清单还不够，最好配上能直接复制粘贴跑的命令。</p>
+<h3 id="9-3-评估-Skill-好不好用"><a href="#9-3-评估-Skill-好不好用" class="headerlink" title="9.3 评估 Skill 好不好用"></a>9.3 评估 Skill 好不好用</h3><p>Anthropic 推荐了一套评估方法：</p>
+<ol>
+<li><strong>准备测试用例</strong>——正常情况和边界情况都要有</li>
+<li><strong>对比跑一下</strong>——有 Skill 和没 Skill 各跑一遍</li>
+<li><strong>定义通过标准</strong>——每个用例怎么算”通过”</li>
+<li><strong>看数据</strong>——通过率、Token 消耗、运行时间</li>
+<li><strong>根据结果调整</strong>——哪里不行改哪里，再跑一轮</li>
+</ol>
+<hr>
+<h2 id="十、Skill-跑不通？调试与排错指南"><a href="#十、Skill-跑不通？调试与排错指南" class="headerlink" title="十、Skill 跑不通？调试与排错指南"></a>十、Skill 跑不通？调试与排错指南</h2><h3 id="常见排查流程"><a href="#常见排查流程" class="headerlink" title="常见排查流程"></a>常见排查流程</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">1. 确认 Skill 已加载     → 路径对不对、格式有没有错</span><br><span class="line">         ↓</span><br><span class="line">2. 确认触发正确          → Description 是否匹配用户意图</span><br><span class="line">         ↓</span><br><span class="line">3. 确认指令清晰          → 逐步检查 AI 输出与预期的偏差点</span><br><span class="line">         ↓</span><br><span class="line">4. 确认脚本可执行        → 权限、依赖、路径、平台兼容性</span><br><span class="line">         ↓</span><br><span class="line">5. 加检查点缩小范围      → 在关键步骤之间插入验证命令</span><br><span class="line">         ↓</span><br><span class="line">6. 对比测试定位问题      → 有 Skill vs 无 Skill，看差异出在哪</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>经验之谈</strong>：大多数问题（估计 70% 以上）出在前两步——要么 Skill 没加载成功，要么 Description 写得不够好导致没触发。</p>
+</blockquote>
+<h3 id="多个-Skill-冲突了怎么办"><a href="#多个-Skill-冲突了怎么办" class="headerlink" title="多个 Skill 冲突了怎么办"></a>多个 Skill 冲突了怎么办</h3><table>
+<thead>
+<tr>
+<th>策略</th>
+<th>做法</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>差异化 description</td>
+<td>让每个 Skill 的 description 有明确的区分关键词</td>
+<td>功能有部分重叠的 Skill</td>
+</tr>
+<tr>
+<td>合并为一个</td>
+<td>如果两个 Skill 经常一起被触发，考虑合并</td>
+<td>高度相关的 Skill</td>
+</tr>
+<tr>
+<td>添加排斥说明</td>
+<td>显式说明”本 Skill 不处理 XXX 场景”</td>
+<td>容易被误触发的 Skill</td>
+</tr>
+<tr>
+<td>手动指定</td>
+<td>在对话中明确指定使用哪个 Skill</td>
+<td>需要精确控制时</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="十一、Skill-的生命周期管理"><a href="#十一、Skill-的生命周期管理" class="headerlink" title="十一、Skill 的生命周期管理"></a>十一、Skill 的生命周期管理</h2><h3 id="版本控制"><a href="#版本控制" class="headerlink" title="版本控制"></a>版本控制</h3><table>
+<thead>
+<tr>
+<th>变更类型</th>
+<th>版本变化</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>修复问题、补充说明</td>
+<td>1.0 → 1.1</td>
+<td>修复某个边界场景的处理逻辑</td>
+</tr>
+<tr>
+<td>新增步骤或场景</td>
+<td>1.1 → 1.2</td>
+<td>增加对 gRPC 客户端的支持</td>
+</tr>
+<tr>
+<td>重大结构调整</td>
+<td>1.x → 2.0</td>
+<td>从单体拆分为模块化架构</td>
+</tr>
+</tbody></table>
+<h3 id="团队协作"><a href="#团队协作" class="headerlink" title="团队协作"></a>团队协作</h3><ul>
+<li><strong>像代码一样 Review</strong>——新 Skill 或重大修改通过 PR 提交</li>
+<li><strong>维护变更日志</strong>——在 Skill 目录下维护 CHANGELOG</li>
+<li><strong>避免冲突</strong>——按功能模块分工，各写各的子 Skill</li>
+<li><strong>定期清理</strong>——不再使用的 Skill 及时归档或删除</li>
+</ul>
+<h3 id="持续迭代"><a href="#持续迭代" class="headerlink" title="持续迭代"></a>持续迭代</h3><p>Skill 不是写完就不管了。用的过程中肯定会发现问题，定期打磨一下：</p>
+<ul>
+<li>记下来哪里出过问题</li>
+<li>找找规律——同一类错误反复出现？那就是 Skill 写得不够清楚</li>
+<li>从个案中提炼通用规则</li>
+<li>越精简越好</li>
+</ul>
+<hr>
+<h2 id="十二、别踩这些坑——常见反模式"><a href="#十二、别踩这些坑——常见反模式" class="headerlink" title="十二、别踩这些坑——常见反模式"></a>十二、别踩这些坑——常见反模式</h2><table>
+<thead>
+<tr>
+<th>反模式</th>
+<th>一句话症状</th>
+<th>解法指引</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>大杂烩 Skill</strong></td>
+<td>一个 Skill 干三件事</td>
+<td>拆分（第四章）</td>
+</tr>
+<tr>
+<td><strong>Description 黑话</strong></td>
+<td>全是内部术语</td>
+<td>用通用语言 + 技术关键词（3.1 节）</td>
+</tr>
+<tr>
+<td><strong>没有示例</strong></td>
+<td>纯文字描述</td>
+<td>加 Few-Shot（3.4、3.5 节）</td>
+</tr>
+<tr>
+<td><strong>没有验证点</strong></td>
+<td>做完才检查</td>
+<td>关键步骤加检查点（9.1 节）</td>
+</tr>
+<tr>
+<td><strong>写死数值</strong></td>
+<td>硬编码配置</td>
+<td>给判断规则和参考范围</td>
+</tr>
+<tr>
+<td><strong>当 Wiki 写</strong></td>
+<td>背景 300 行正文 50 行</td>
+<td>背景放 references&#x2F;（5.2 节）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="十三、总结：写好-Skill-的核心检查清单"><a href="#十三、总结：写好-Skill-的核心检查清单" class="headerlink" title="十三、总结：写好 Skill 的核心检查清单"></a>十三、总结：写好 Skill 的核心检查清单</h2><h3 id="写的内容对不对"><a href="#写的内容对不对" class="headerlink" title="写的内容对不对"></a>写的内容对不对</h3><ul>
+<li><input disabled="" type="checkbox"> <strong>目标明确</strong>：做什么、为什么做、什么时候触发</li>
+<li><input disabled="" type="checkbox"> <strong>Description 精准</strong>：AI 能不能在合适的时候自动匹配到</li>
+<li><input disabled="" type="checkbox"> <strong>语气直接</strong>：直接下指令，而不是绕弯子</li>
+<li><input disabled="" type="checkbox"> <strong>讲了为什么</strong>：不只是说”必须这样做”，还解释了原因</li>
+<li><input disabled="" type="checkbox"> <strong>例子够不够</strong>：有没有 3-5 个 Before&#x2F;After 对比或者示例</li>
+<li><input disabled="" type="checkbox"> <strong>场景考虑全了</strong>：多种情况都覆盖到了</li>
+<li><input disabled="" type="checkbox"> <strong>坑标出来了</strong>：容易犯的错误和注意事项是否标注了</li>
+<li><input disabled="" type="checkbox"> <strong>能验证</strong>：有验证清单和能跑的检查命令</li>
+</ul>
+<h3 id="结构合不合理"><a href="#结构合不合理" class="headerlink" title="结构合不合理"></a>结构合不合理</h3><ul>
+<li><input disabled="" type="checkbox"> YAML 元数据完整</li>
+<li><input disabled="" type="checkbox"> SKILL.md 正文控制在 500 行以内</li>
+<li><input disabled="" type="checkbox"> 模块化拆分：超过 500 行的要拆成主 Skill + 子 Skill</li>
+<li><input disabled="" type="checkbox"> 依赖明确：清楚声明前置条件和相关 Skill</li>
+<li><input disabled="" type="checkbox"> 可视化表达：善用表格、ASCII 流程图</li>
+</ul>
+<h3 id="安全过关了吗"><a href="#安全过关了吗" class="headerlink" title="安全过关了吗"></a>安全过关了吗</h3><ul>
+<li><input disabled="" type="checkbox"> 无硬编码密钥</li>
+<li><input disabled="" type="checkbox"> 危险操作有确认或备份</li>
+<li><input disabled="" type="checkbox"> 输入有校验，不会被注入</li>
+<li><input disabled="" type="checkbox"> 路径安全（防止路径穿越）</li>
+<li><input disabled="" type="checkbox"> 网络请求使用 HTTPS，设置合理超时</li>
+</ul>
+<hr>
+<h2 id="附录：核心术语速查"><a href="#附录：核心术语速查" class="headerlink" title="附录：核心术语速查"></a>附录：核心术语速查</h2><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Level 1&#x2F;2&#x2F;3</td>
+<td>Skill 的三层渐进式加载机制：元数据 → 正文 → 脚本资源</td>
+</tr>
+<tr>
+<td>Few-Shot</td>
+<td>在 Skill 中提供多个输入&#x2F;输出示例，让 AI 模仿学习</td>
+</tr>
+<tr>
+<td>Before&#x2F;After</td>
+<td>改动前后的代码对比，让 AI 清楚知道”改什么”和”改成什么”</td>
+</tr>
+<tr>
+<td>检查点（Checkpoint）</td>
+<td>在关键步骤之间插入的验证命令，用于及时发现偏差</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>YAML 头信息中的描述字段，决定 Skill 何时被自动触发</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>Model Context Protocol，专为 AI 设计的标准化工具协议</td>
+</tr>
+<tr>
+<td>主 Skill &#x2F; 子 Skill</td>
+<td>模块化拆分后的编排层和执行层</td>
+</tr>
+<tr>
+<td>反模式</td>
+<td>常见的”写了但不好使”的模式，应当避免</td>
+</tr>
+</tbody></table>
+<h2 id="参考资源"><a href="#参考资源" class="headerlink" title="参考资源"></a>参考资源</h2><table>
+<thead>
+<tr>
+<th>资源</th>
+<th>链接</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Anthropic 官方 Skills 仓库</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/anthropics/skills">github.com&#x2F;anthropics&#x2F;skills</a></td>
+</tr>
+<tr>
+<td>OpenSkills 生态</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/openskills">github.com&#x2F;openskills</a></td>
+</tr>
+<tr>
+<td>MCP Server 列表</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/modelcontextprotocol/servers">github.com&#x2F;modelcontextprotocol&#x2F;servers</a></td>
+</tr>
+<tr>
+<td>OpenAI Tokenizer</td>
+<td><a target="_blank" rel="noopener" href="https://platform.openai.com/tokenizer">platform.openai.com&#x2F;tokenizer</a></td>
+</tr>
+</tbody></table>
+<hr>
+<blockquote>
+<p>写 Skill 这件事，说到底就是把你脑子里”知道怎么做”的经验，变成 AI 也能”照着做”的格式。第一版肯定不完美，但没关系，用着用着就知道哪里需要改了。好的 Skill 都是在实际使用中一点点打磨出来的。</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://LongLongMorty.github.io">LongMorty</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://longlongmorty.github.io/2026/07/19/%E5%A6%82%E4%BD%95%E5%86%99%E5%A5%BD-Skill%EF%BC%9A%E4%B8%80%E4%BB%BD%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C%E6%89%8B%E5%86%8C/">https://longlongmorty.github.io/2026/07/19/%E5%A6%82%E4%BD%95%E5%86%99%E5%A5%BD-Skill%EF%BC%9A%E4%B8%80%E4%BB%BD%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C%E6%89%8B%E5%86%8C/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://LongLongMorty.github.io" target="_blank">LongMorty</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/AI/">AI</a><a class="post-meta__tags" href="/tags/Skill/">Skill</a><a class="post-meta__tags" href="/tags/Prompt-Engineering/">Prompt Engineering</a></div><div class="post-share"><div class="social-share" data-image="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260719211645152.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/06/22/%E6%99%BA%E8%83%BD%E6%96%87%E4%BB%B6%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%BA%8C%EF%BC%89Embedding%E3%80%81%E6%8C%81%E4%B9%85%E5%8C%96%E4%BB%A5%E5%8F%8Aretrieve/" title="智能文件问答系统（二）Embedding、持久化以及retrieve"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260622154010740.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">智能文件问答系统（二）Embedding、持久化以及retrieve</div></div><div class="info-2"><div class="info-item-1">智能文件问答系统（二）Embedding、持久化以及retrieve让我们通过一个完整的实战案例，展示如何将记忆系统和RAG系统有机结合，构建一个智能文档问答助手。 背景在实际工作中，我们经常需要处理大量的技术文档、研究论文、产品手册等PDF文件。传统的文档阅读方式效率低下，难以快速定位关键信息，更无法建立知识间的关联。本案例将基于动手学大模型教程Happy-LLM的公测PDF文档Happy...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/13/Learn-Tool-Use-RAG-And-Memory/" title="Learn Tool Use, RAG, And Memory"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613173544233.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-13</div><div class="info-item-2">Learn Tool Use, RAG, And Memory</div></div><div class="info-2"><div class="info-item-1">Learn Tool Use, RAG, And Memory做检索增强生成：chunk、embed、retrieve、answer with citations检索增强生成（RAG, Retrieval-Augmented Generation）是目前工业界解决大模型“幻觉”和知识滞后的标准方案。简单来说，它就是给 LLM 配上了一个可搜索的“外挂大脑”。 我们可以将 RAG 拆解为两个阶...</div></div></div></a><a class="pagination-related" href="/2026/06/22/%E6%99%BA%E8%83%BD%E6%96%87%E4%BB%B6%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%BA%8C%EF%BC%89Embedding%E3%80%81%E6%8C%81%E4%B9%85%E5%8C%96%E4%BB%A5%E5%8F%8Aretrieve/" title="智能文件问答系统（二）Embedding、持久化以及retrieve"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260622154010740.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="info-item-2">智能文件问答系统（二）Embedding、持久化以及retrieve</div></div><div class="info-2"><div class="info-item-1">智能文件问答系统（二）Embedding、持久化以及retrieve让我们通过一个完整的实战案例，展示如何将记忆系统和RAG系统有机结合，构建一个智能文档问答助手。 背景在实际工作中，我们经常需要处理大量的技术文档、研究论文、产品手册等PDF文件。传统的文档阅读方式效率低下，难以快速定位关键信息，更无法建立知识间的关联。本案例将基于动手学大模型教程Happy-LLM的公测PDF文档Happy...</div></div></div></a><a class="pagination-related" href="/2026/06/13/GO%E8%AF%AD%E8%A8%80-%E5%AE%9E%E7%8E%B0%E8%B5%84%E6%96%99%E7%A0%94%E7%A9%B6%E5%8A%A9%E6%89%8Bmini-Agent/" title="GO语言 实现资料研究助手mini Agent"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613221016838.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-13</div><div class="info-item-2">GO语言 实现资料研究助手mini Agent</div></div><div class="info-2"><div class="info-item-1">GO语言 实现资料研究助手mini Agent 一个资料研究助手demo项目，输入主题后自动搜索、筛选、总结并输出引用链接。 使用到的库主要是github.com/sashabaranov/go-openai，用到的模型为gpt5.4-min，物理联网引擎工具是tavily（每个月免费一千次请求）。 先 定义个Tavily 官方响应的标准 Go 结构体 1234567type TavilyR...</div></div></div></a><a class="pagination-related" href="/2026/06/11/Understand-What-An-Agent-Is/" title="Understand What An Agent Is"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260611165812306.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-11</div><div class="info-item-2">Understand What An Agent Is</div></div><div class="info-2"><div class="info-item-1">Agent 学习笔记Stage 0: Understand What An Agent Is1. 区分 chatbot、workflow、agent、multi-agent这四个概念代表了大模型（LLM）应用落地中从简单到复杂、从被动到主动的演进路径。我们可以从核心定义、自主性、控制流等维度来彻底理清它们的区别。 Chatbot（聊天机器人） 核心特征： 纯粹的”一问一答”与状态保持。 如何...</div></div></div></a><a class="pagination-related" href="/2026/06/18/Plan-and-Solve%E6%A8%A1%E5%BC%8F/" title="Plan-and-Solve模式"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260618002207769.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-18</div><div class="info-item-2">Plan-and-Solve模式</div></div><div class="info-2"><div class="info-item-1">Plan-and-Solve模式在我们掌握了 ReAct 这种反应式的、步进决策的智能体范式后，接下来将探讨一种风格迥异但同样强大的方法，Plan-and-Solve。顾名思义，这种范式将任务处理明确地分为两个阶段：先规划 (Plan)，后执行 (Solve)。 如果说 ReAct 像一个经验丰富的侦探，根据现场的蛛丝马迹（Observation）一步步推理，随时调整自己的调查方向；那么 P...</div></div></div></a><a class="pagination-related" href="/2026/06/12/Go%E8%AF%AD%E8%A8%80-Deepseek-API%E5%81%9A%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8Fagent%E6%95%99%E5%AD%A6/" title="Go语言+Deepseek API做一个最小agent教学"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260612214914986.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-12</div><div class="info-item-2">Go语言+Deepseek API做一个最小agent教学</div></div><div class="info-2"><div class="info-item-1">Go语言+Deepseek API做一个最小agent教学打算用Go做一个最小 agent，可以选择工具、执行工具、返回最终答案，用到的库是github.com/sashabaranov/go-openai，模型是deepseek v4 flash。 1.简单的 LLM API首先我们来构建一个简单的 LLM API 完成普通对话，我采用的是OPENAI 的标准实现，刚好我最近在deepse...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%85%E8%AF%BB%E5%BB%BA%E8%AE%AE"><span class="toc-text">阅读建议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%85%88%E6%90%9E%E6%B8%85%E6%A5%9A-Skill-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">一、先搞清楚 Skill 是什么</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-Skill-%E5%88%B0%E5%BA%95%E6%98%AF%E5%95%A5"><span class="toc-text">1.1 Skill 到底是啥</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%86%99-Skill"><span class="toc-text">1.2 为什么要写 Skill</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-Skill-%E6%80%8E%E4%B9%88%E8%BF%90%E4%BD%9C%E7%9A%84"><span class="toc-text">1.3 Skill 怎么运作的</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-Skill-%E8%83%BD%E7%94%A8%E5%9C%A8%E5%93%AA%E4%BA%9B%E5%9C%BA%E6%99%AF"><span class="toc-text">1.4 Skill 能用在哪些场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Skill-%E9%95%BF%E4%BB%80%E4%B9%88%E6%A0%B7"><span class="toc-text">二、Skill 长什么样</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E6%9C%80%E5%9F%BA%E6%9C%AC%E7%9A%84%E6%A0%B7%E5%AD%90"><span class="toc-text">2.1 最基本的样子</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-SKILL-md-%E9%87%8C%E9%9D%A2%E5%86%99%E4%BB%80%E4%B9%88"><span class="toc-text">2.2 SKILL.md 里面写什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E6%94%BE%E5%9C%A8%E5%93%AA%E9%87%8C"><span class="toc-text">2.3 放在哪里</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-Skill-%E5%92%8C-Rule-%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB"><span class="toc-text">2.4 Skill 和 Rule 有什么区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-Quick-Start%EF%BC%9A5-%E5%88%86%E9%92%9F%E5%86%99%E5%87%BA%E4%BD%A0%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA-Skill"><span class="toc-text">2.5 Quick Start：5 分钟写出你的第一个 Skill</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%86%99%E5%87%BA%E5%A5%BD-Skill-%E7%9A%84%E5%85%B3%E9%94%AE%E6%8A%80%E5%B7%A7"><span class="toc-text">三、写出好 Skill 的关键技巧</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-Description-%E5%86%99%E5%A5%BD%E4%BA%86%EF%BC%8C%E4%B8%80%E5%88%87%E5%B0%B1%E6%88%90%E5%8A%9F%E4%BA%86%E4%B8%80%E5%8D%8A"><span class="toc-text">3.1 Description 写好了，一切就成功了一半</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%BC%80%E5%A4%B4%E5%B0%B1%E8%AF%B4%E6%B8%85%E6%A5%9A%EF%BC%9A%E5%81%9A%E4%BB%80%E4%B9%88%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E3%80%81%E8%A6%81%E4%B8%8D%E8%A6%81%E5%81%9A"><span class="toc-text">3.2 开头就说清楚：做什么、为什么、要不要做</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E7%94%A8%E7%A5%88%E4%BD%BF%E5%8F%A5%E4%B8%8B%E6%8C%87%E4%BB%A4%EF%BC%8C%E8%A7%A3%E9%87%8A%E2%80%9D%E4%B8%BA%E4%BB%80%E4%B9%88%E2%80%9D"><span class="toc-text">3.3 用祈使句下指令，解释”为什么”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E7%BB%99%E5%87%BA%E2%80%9D%E6%94%B9%E4%B9%8B%E5%89%8D-vs-%E6%94%B9%E4%B9%8B%E5%90%8E%E2%80%9D%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="toc-text">3.4 给出”改之前 vs 改之后”的对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-Few-Shot%EF%BC%8C%E5%A4%9A%E7%BB%99%E5%87%A0%E4%B8%AA%E4%BE%8B%E5%AD%90%EF%BC%8CAI-%E5%B0%B1%E4%B8%8D%E4%BC%9A%E7%9E%8E%E5%8F%91%E6%8C%A5"><span class="toc-text">3.5 Few-Shot，多给几个例子，AI 就不会瞎发挥</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-6-%E5%96%84%E7%94%A8%E5%8F%AF%E8%A7%86%E5%8C%96%EF%BC%9A%E5%86%B3%E7%AD%96%E6%A0%91%E4%B8%8E%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="toc-text">3.6 善用可视化：决策树与流程图</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81Skill-%E5%A4%AA%E9%95%BF%E4%BA%86%E6%80%8E%E4%B9%88%E5%8A%9E%E2%80%94%E2%80%94%E6%8B%86%EF%BC%88%E6%A8%A1%E5%9D%97%E5%8C%96%EF%BC%89"><span class="toc-text">四、Skill 太长了怎么办——拆（模块化）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E8%AF%A5%E6%8B%86"><span class="toc-text">4.1 什么时候该拆</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E6%8B%86%E6%88%90%E4%BB%80%E4%B9%88%E6%A0%B7%E2%80%94%E2%80%94%E6%A8%A1%E5%9D%97%E5%8C%96%E8%AE%BE%E8%AE%A1"><span class="toc-text">4.2 拆成什么样——模块化设计</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E6%8B%86%E5%88%86%E7%9A%84%E5%87%A0%E4%B8%AA%E5%8E%9F%E5%88%99"><span class="toc-text">4.3 拆分的几个原则</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E4%B8%80%E4%BA%9B%E8%BF%9B%E9%98%B6%E7%9A%84%E5%86%99%E6%B3%95"><span class="toc-text">五、一些进阶的写法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E8%83%BD%E7%94%A8%E8%A1%A8%E6%A0%BC%E5%B0%B1%E7%94%A8%E8%A1%A8%E6%A0%BC"><span class="toc-text">5.1 能用表格就用表格</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E5%A4%8D%E6%9D%82%E6%A3%80%E6%9F%A5%E9%80%BB%E8%BE%91%EF%BC%9F%E5%86%99%E6%88%90%E8%84%9A%E6%9C%AC"><span class="toc-text">5.2 复杂检查逻辑？写成脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E6%8F%90%E4%BE%9B%E5%A4%9A%E7%A7%8D%E6%96%B9%E6%A1%88%E9%80%82%E9%85%8D%E4%B8%8D%E5%90%8C%E5%9C%BA%E6%99%AF"><span class="toc-text">5.3 提供多种方案适配不同场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-%E6%8A%8A%E5%AE%B9%E6%98%93%E8%B8%A9%E7%9A%84%E5%9D%91%E6%A0%87%E5%87%BA%E6%9D%A5"><span class="toc-text">5.4 把容易踩的坑标出来</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-FAQ-%E4%B8%8D%E6%98%AF%E6%91%86%E8%AE%BE"><span class="toc-text">5.5 FAQ 不是摆设</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E8%A6%81%E8%B0%83%E5%A4%96%E9%83%A8%E6%9C%8D%E5%8A%A1%EF%BC%9FMCP-vs-HTTP"><span class="toc-text">六、要调外部服务？MCP vs HTTP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E5%AE%83%E4%BB%AC%E7%9A%84%E5%8C%BA%E5%88%AB%E5%9C%A8%E5%93%AA"><span class="toc-text">6.1 它们的区别在哪</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E6%80%8E%E4%B9%88%E9%80%89"><span class="toc-text">6.2 怎么选</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%AE%89%E5%85%A8%E6%84%8F%E8%AF%86%EF%BC%9A%E5%88%AB%E8%AE%A9-Skill-%E5%8F%98%E6%88%90%E6%BC%8F%E6%B4%9E%E5%85%A5%E5%8F%A3"><span class="toc-text">七、安全意识：别让 Skill 变成漏洞入口</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E7%BB%9D%E4%B8%8D%E7%A1%AC%E7%BC%96%E7%A0%81%E6%95%8F%E6%84%9F%E4%BF%A1%E6%81%AF"><span class="toc-text">7.1 绝不硬编码敏感信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-%E5%8D%B1%E9%99%A9%E6%93%8D%E4%BD%9C%E5%BF%85%E9%A1%BB%E5%8A%A0%E7%A1%AE%E8%AE%A4"><span class="toc-text">7.2 危险操作必须加确认</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C%E5%85%88%E5%A4%87%E4%BB%BD%E5%86%8D%E6%94%B9"><span class="toc-text">7.3 数据库操作先备份再改</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-4-%E9%98%B2%E8%8C%83-Prompt-%E6%B3%A8%E5%85%A5"><span class="toc-text">7.4 防范 Prompt 注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-5-%E5%AE%89%E5%85%A8%E6%A3%80%E6%9F%A5%E6%B8%85%E5%8D%95"><span class="toc-text">7.5 安全检查清单</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E7%94%A8-Skill-Creator-%E5%B8%AE%E4%BD%A0%E5%86%99-Skill%EF%BC%88%E5%90%AB%E5%B7%A5%E7%A8%8B%E5%8C%96%E8%AF%84%E4%BC%B0%EF%BC%89"><span class="toc-text">八、用 Skill Creator 帮你写 Skill（含工程化评估）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8-1-%E6%A0%B8%E5%BF%83%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-text">8.1 核心工作流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-2-%E5%B7%A5%E7%A8%8B%E5%8C%96%E8%AF%84%E4%BC%B0"><span class="toc-text">8.2 工程化评估</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E5%81%9A%E5%AE%8C%E4%BA%86%E6%80%8E%E4%B9%88%E9%AA%8C%E8%AF%81"><span class="toc-text">九、做完了怎么验证</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#9-1-%E5%88%97%E6%B8%85%E5%8D%95%E9%AA%8C%E8%AF%81"><span class="toc-text">9.1 列清单验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-2-%E6%8F%90%E4%BE%9B%E9%AA%8C%E8%AF%81%E5%91%BD%E4%BB%A4"><span class="toc-text">9.2 提供验证命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-3-%E8%AF%84%E4%BC%B0-Skill-%E5%A5%BD%E4%B8%8D%E5%A5%BD%E7%94%A8"><span class="toc-text">9.3 评估 Skill 好不好用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E3%80%81Skill-%E8%B7%91%E4%B8%8D%E9%80%9A%EF%BC%9F%E8%B0%83%E8%AF%95%E4%B8%8E%E6%8E%92%E9%94%99%E6%8C%87%E5%8D%97"><span class="toc-text">十、Skill 跑不通？调试与排错指南</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E6%8E%92%E6%9F%A5%E6%B5%81%E7%A8%8B"><span class="toc-text">常见排查流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E4%B8%AA-Skill-%E5%86%B2%E7%AA%81%E4%BA%86%E6%80%8E%E4%B9%88%E5%8A%9E"><span class="toc-text">多个 Skill 冲突了怎么办</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%B8%80%E3%80%81Skill-%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E7%AE%A1%E7%90%86"><span class="toc-text">十一、Skill 的生命周期管理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6"><span class="toc-text">版本控制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C"><span class="toc-text">团队协作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%81%E7%BB%AD%E8%BF%AD%E4%BB%A3"><span class="toc-text">持续迭代</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81%E5%88%AB%E8%B8%A9%E8%BF%99%E4%BA%9B%E5%9D%91%E2%80%94%E2%80%94%E5%B8%B8%E8%A7%81%E5%8F%8D%E6%A8%A1%E5%BC%8F"><span class="toc-text">十二、别踩这些坑——常见反模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%B8%89%E3%80%81%E6%80%BB%E7%BB%93%EF%BC%9A%E5%86%99%E5%A5%BD-Skill-%E7%9A%84%E6%A0%B8%E5%BF%83%E6%A3%80%E6%9F%A5%E6%B8%85%E5%8D%95"><span class="toc-text">十三、总结：写好 Skill 的核心检查清单</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99%E7%9A%84%E5%86%85%E5%AE%B9%E5%AF%B9%E4%B8%8D%E5%AF%B9"><span class="toc-text">写的内容对不对</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%84%E5%90%88%E4%B8%8D%E5%90%88%E7%90%86"><span class="toc-text">结构合不合理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E8%BF%87%E5%85%B3%E4%BA%86%E5%90%97"><span class="toc-text">安全过关了吗</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E6%A0%B8%E5%BF%83%E6%9C%AF%E8%AF%AD%E9%80%9F%E6%9F%A5"><span class="toc-text">附录：核心术语速查</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%BA%90"><span class="toc-text">参考资源</span></a></li></ol></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By LongMorty</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script src="/js/custom.js"></script><canvas class="fireworks" mobile="true"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      false
+        ? pjax.loadUrl('/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
