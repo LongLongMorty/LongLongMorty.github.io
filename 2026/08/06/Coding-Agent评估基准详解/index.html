@@ -1,0 +1,495 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Coding Agent 评估基准详解：SWE-bench、Terminal-Bench 与 τ-bench | LongMorty</title><meta name="author" content="LongMorty"><meta name="copyright" content="LongMorty"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="想验证自己的 Coding Agent 到底行不行？本文以问答形式详解三大主流 Agent 评估基准（SWE-bench Verified、Terminal-Bench 2.0、τ-bench）的验证机制与评估指标，并给出为自研 Agent 设计精简基准（20~25 条任务）的完整方案。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Coding Agent 评估基准详解：SWE-bench、Terminal-Bench 与 τ-bench">
+<meta property="og:url" content="https://longlongmorty.github.io/2026/08/06/Coding-Agent%E8%AF%84%E4%BC%B0%E5%9F%BA%E5%87%86%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="LongMorty">
+<meta property="og:description" content="想验证自己的 Coding Agent 到底行不行？本文以问答形式详解三大主流 Agent 评估基准（SWE-bench Verified、Terminal-Bench 2.0、τ-bench）的验证机制与评估指标，并给出为自研 Agent 设计精简基准（20~25 条任务）的完整方案。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260806235309345.png">
+<meta property="article:published_time" content="2026-08-06T13:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-06T15:53:49.221Z">
+<meta property="article:author" content="LongMorty">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Agent">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260806235309345.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Coding Agent 评估基准详解：SWE-bench、Terminal-Bench 与 τ-bench",
+  "url": "https://longlongmorty.github.io/2026/08/06/Coding-Agent%E8%AF%84%E4%BC%B0%E5%9F%BA%E5%87%86%E8%AF%A6%E8%A7%A3/",
+  "image": "https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260806235309345.png",
+  "datePublished": "2026-08-06T13:00:00.000Z",
+  "dateModified": "2026-08-06T15:53:49.221Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "LongMorty",
+      "url": "https://LongLongMorty.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png"><link rel="canonical" href="https://longlongmorty.github.io/2026/08/06/Coding-Agent%E8%AF%84%E4%BC%B0%E5%9F%BA%E5%87%86%E8%AF%A6%E8%A7%A3/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Coding Agent 评估基准详解：SWE-bench、Terminal-Bench 与 τ-bench',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.1"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">16</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260806235309345.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/ileina.png" alt="Logo"><span class="site-name">LongMorty</span></a><a class="nav-page-title" href="/"><span class="site-name">Coding Agent 评估基准详解：SWE-bench、Terminal-Bench 与 τ-bench</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Coding Agent 评估基准详解：SWE-bench、Terminal-Bench 与 τ-bench</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">发表于</span><time datetime="2026-08-06T13:00:00.000Z" title="发表于 2026-08-06 21:00:00">2026-08-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/AI/">AI</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>10分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Coding-Agent-评估基准详解：SWE-bench、Terminal-Bench-与-τ-bench"><a href="#Coding-Agent-评估基准详解：SWE-bench、Terminal-Bench-与-τ-bench" class="headerlink" title="Coding Agent 评估基准详解：SWE-bench、Terminal-Bench 与 τ-bench"></a>Coding Agent 评估基准详解：SWE-bench、Terminal-Bench 与 τ-bench</h1><p>开发自己的 Coding Agent 时，最核心的问题莫过于：<strong>它到底行不行？</strong></p>
+<p>靠人工一个个试任务显然不科学。业界已经沉淀出几套公认的评估基准，从不同维度回答”Agent 行不行”。本文以一问一答的形式，逐一拆解三大主流基准的验证机制、评估指标，以及如何借鉴它们为自研 Agent 搭一套精简评测。</p>
+<hr>
+<h2 id="Q1：为什么要用评估基准来检验-Coding-Agent？"><a href="#Q1：为什么要用评估基准来检验-Coding-Agent？" class="headerlink" title="Q1：为什么要用评估基准来检验 Coding Agent？"></a>Q1：为什么要用评估基准来检验 Coding Agent？</h2><p>因为”感觉能用”和”真的能用”是两回事。没有量化标准，你无法回答：</p>
+<ul>
+<li>Agent 的这次迭代到底是变强了还是变弱了？</li>
+<li>是 Prompt 的问题、工具调用的问题，还是模型本身的问题？</li>
+<li>它能不能达到可交付、可商用的标准？</li>
+</ul>
+<p>评估基准就是一套<strong>标准化的”考卷”</strong>：给定任务 → 让 Agent 独立完成 → 用客观规则自动判定对错。业界主流的考卷有三套，各考各的能力：</p>
+<table>
+<thead>
+<tr>
+<th>基准</th>
+<th>考什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>SWE-bench Verified</strong></td>
+<td>能不能读懂 Issue、修好真实 GitHub 仓库的 Bug</td>
+</tr>
+<tr>
+<td><strong>Terminal-Bench 2.0</strong></td>
+<td>能不能在真实 Linux 终端里自主完成多步骤系统级任务</td>
+</tr>
+<tr>
+<td><strong>τ-bench（Sierra）</strong></td>
+<td>能不能与真实用户多轮沟通，并在遵守业务规则的前提下操作 API</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="Q2：SWE-bench-Verified-是怎么验证的？"><a href="#Q2：SWE-bench-Verified-是怎么验证的？" class="headerlink" title="Q2：SWE-bench Verified 是怎么验证的？"></a>Q2：SWE-bench Verified 是怎么验证的？</h2><p><strong>答：核心机制是”真实代码库上下文 + 真实 Issue 说明 → AI 生成 Git Patch → 沙箱运行单元测试”。</strong></p>
+<p>它由 OpenAI 与 SWE-bench 原团队（普林斯顿大学等）合作推出，对原始 2,294 个样本进行人工标注与筛选，剔除了描述模糊、测试过苛、环境失效三类噪点，最终精选出 <strong>500 个高质量 Python Issue</strong>。</p>
+<p>验证流程分 4 个阶段：</p>
+<p><strong>阶段 1：上下文输入（Input）</strong></p>
+<p>给 Agent 提供三样东西：</p>
+<ul>
+<li><strong>问题描述（<code>problem_statement</code>）</strong>：真实 GitHub Issue 的标题与正文</li>
+<li><strong>代码库与 Commit</strong>：基于基础 Commit（<code>base_commit</code>）签出的完整代码仓库</li>
+<li><strong>提示信息（可选）</strong>：Issue 提交之前的讨论评论（<code>hints_text</code>）</li>
+</ul>
+<p><strong>阶段 2：生成解决方案（Patch Output）</strong></p>
+<p>Agent 对代码库进行搜索、阅读、定位、修改，最终输出一个统一的 <strong>Git Patch（Diff 格式）</strong> 文件。</p>
+<p><strong>阶段 3：隔离环境执行（Evaluation）</strong></p>
+<p>用 Docker 容器搭建独立环境，将 Patch 应用到仓库基础版本，然后运行两组单元测试：</p>
+<table>
+<thead>
+<tr>
+<th>测试集</th>
+<th>含义</th>
+<th>判定要求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>FAIL_TO_PASS</code></td>
+<td>对应 Issue 新增&#x2F;修改的测试，未打补丁前必须<strong>失败</strong>（即重现 Bug）</td>
+<td>打补丁后必须<strong>全部通过</strong></td>
+</tr>
+<tr>
+<td><code>PASS_TO_PASS</code></td>
+<td>原有的无关测试</td>
+<td>打补丁后必须<strong>依然通过</strong>（没有破坏已有功能）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="Q3：SWE-bench-Verified-的评估指标是什么？"><a href="#Q3：SWE-bench-Verified-的评估指标是什么？" class="headerlink" title="Q3：SWE-bench Verified 的评估指标是什么？"></a>Q3：SWE-bench Verified 的评估指标是什么？</h2><p><strong>答：采用二元判定（Pass&#x2F;Fail），没有部分得分。</strong></p>
+<p><strong>核心指标：解决率（Resolved Rate &#x2F; Pass@1）</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Resolved Rate = 成功解决的 Issue 数量 ÷ 总 Issue 数量 (500) × 100%</span><br></pre></td></tr></table></figure>
+
+<p>单个样本被判定为 <strong>Resolved</strong>，必须同时满足三个条件：</p>
+<ol>
+<li>Patch 可以被 <code>git apply</code> 成功应用，不产生冲突</li>
+<li>所有 <code>FAIL_TO_PASS</code> 测试全部通过</li>
+<li>所有 <code>PASS_TO_PASS</code> 测试全部通过</li>
+</ol>
+<p><strong>只要有一个关联测试失败，该样本就是 0 分。</strong></p>
+<p>辅助分析维度（常用于性能与成本诊断）：</p>
+<ul>
+<li><strong>成功率 vs API 成本 &#x2F; Token 消耗</strong>：解决一个问题调用模型的次数和花费</li>
+<li><strong>Patch 大小</strong>：过大的 Patch 容易包含噪音或非法改动</li>
+<li><strong>运行耗时</strong>：从推理到环境构建、运行测试的总用时（单个样本通常设超时上限，如 1800 秒）</li>
+</ul>
+<hr>
+<h2 id="Q4：Terminal-Bench-2-0-是怎么验证的？"><a href="#Q4：Terminal-Bench-2-0-是怎么验证的？" class="headerlink" title="Q4：Terminal-Bench 2.0 是怎么验证的？"></a>Q4：Terminal-Bench 2.0 是怎么验证的？</h2><p><strong>答：核心机制是”Docker 容器隔离 + 交互式 Agent + 隐藏验证器（Verifier）”。</strong></p>
+<p>它由 Laude Institute 等团队推出，包含 <strong>89 个经人工精心挑选的高难度终端任务</strong>（覆盖系统管理、代码编译、网络配置、漏洞修复、数据库处理等）。如果说 SWE-bench 考”改代码”，Terminal-Bench 考的是”在真实 Linux 终端里干活”。</p>
+<p><strong>1. 任务设计</strong>：每个任务包含四部分——</p>
+<ul>
+<li><code>instruction.md</code>：给 Agent 的自然语言任务指令</li>
+<li><code>environment/</code>：预先定义好的 Docker 镜像或环境文件</li>
+<li><code>tests/</code>：隐藏在外部（Agent 无法查看或篡改）的自动化验证脚本</li>
+<li><code>solution/</code>：人类专家给出的标准参考解法</li>
+</ul>
+<p><strong>2. 交互式沙箱</strong>：用专用评测框架（如 <strong>Harbor</strong>）启动 Docker 容器，把 Agent 投进 Bash 终端。Agent 可以不断执行命令、查看输出、创建文件、调试报错，交互轮数可达 <strong>200 轮</strong>。</p>
+<p><strong>3. 自动判定</strong>：Agent 认为任务完成（或耗尽轮数&#x2F;超时）后，触发<strong>外部隐藏验证器</strong>，在容器内执行自动化指令——检查端口是否监听、文件是否存在且内容正确、编译产物能否跑通等。</p>
+<hr>
+<h2 id="Q5：Terminal-Bench-2-0-的评估指标是什么？"><a href="#Q5：Terminal-Bench-2-0-的评估指标是什么？" class="headerlink" title="Q5：Terminal-Bench 2.0 的评估指标是什么？"></a>Q5：Terminal-Bench 2.0 的评估指标是什么？</h2><p><strong>答：二值化准确率（Binary Pass&#x2F;Fail），同样是”全对才算过”。</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Accuracy = 完全通过验证器的任务数 ÷ 总任务数 (89) × 100%</span><br></pre></td></tr></table></figure>
+
+<p>通过条件：隐藏验证器执行完<strong>所有</strong>测试脚本且<strong>全部断言通过</strong>。只要有任何一个断言失败、服务未按要求启动、超过轮数&#x2F;时间限制，直接判 <strong>0（Fail）</strong>，没有中间分数。</p>
+<p>辅助分析维度（Agent 行为诊断）：</p>
+<ul>
+<li><strong>交互轮数（Turns）</strong>：完成任务用了多少次命令交互</li>
+<li><strong>Token 消耗与成本（Cost USD）</strong>：完成任务的经济效率</li>
+<li><strong>超时与死循环率（Timeout &#x2F; Loop Rate）</strong>：是否陷入无效卡死或无限循环</li>
+</ul>
+<hr>
+<h2 id="Q6：想为自研-Coding-Agent-设计类似-Terminal-Bench-的精简方案，大概设计多少条、保留哪些？"><a href="#Q6：想为自研-Coding-Agent-设计类似-Terminal-Bench-的精简方案，大概设计多少条、保留哪些？" class="headerlink" title="Q6：想为自研 Coding Agent 设计类似 Terminal-Bench 的精简方案，大概设计多少条、保留哪些？"></a>Q6：想为自研 Coding Agent 设计类似 Terminal-Bench 的精简方案，大概设计多少条、保留哪些？</h2><p><strong>答：推荐 20~25 条任务，按 5 大核心类别划分。</strong></p>
+<p>标准 Terminal-Bench 2.0 有近 90 个任务，运行成本高、评测耗时长。自研 Agent 迭代更需要<strong>评测快速、成本可控、覆盖核心链路</strong>的”基准小工具集”。</p>
+<p><strong>为什么是 20~25 条？</strong></p>
+<ul>
+<li>4<del>8 并发 Docker 沙箱下，**5</del>10 分钟**跑完全量评测，适合接入 CI&#x2F;CD 或日常 Regression Test</li>
+<li>每对一个任务增加约 4% 准确率，能拉开不同版本 Agent 的差距</li>
+<li>足以覆盖终端交互最核心的 5 大能力维度</li>
+</ul>
+<p><strong>核心架构保持三要素</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">benchmark/</span><br><span class="line">├── task_01_git_merge/</span><br><span class="line">│   ├── instruction.md   # 给 Agent 的自然语言任务描述</span><br><span class="line">│   ├── docker/          # 初始化好的 Dockerfile / 环境</span><br><span class="line">│   └── verify.sh        # 隐藏在沙箱外部的断言脚本 (返回 0 表示 PASS)</span><br></pre></td></tr></table></figure>
+
+<p><strong>5 大任务类别及分配（共 25 条）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>条数</th>
+<th>考察点</th>
+<th>推荐任务示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>环境搭建与依赖编译（Setup &amp; Build）</td>
+<td>6</td>
+<td>能否自主解决环境配置失败、依赖缺失</td>
+<td>Python 依赖冲突修复；缺系统库的 C&#x2F;C++&#x2F;Go 项目编译；pyenv&#x2F;nvm 多语言版本切换；<code>docker compose up</code> 启动多容器服务</td>
+</tr>
+<tr>
+<td>深入调试与 Bug 修复（Debugging &amp; Diagnosis）</td>
+<td>6</td>
+<td>“看日志、定位报错、动态修复”</td>
+<td>端口占用进程诊断（lsof&#x2F;netstat&#x2F;kill）；崩溃日志定位（OOM&#x2F;空指针）；环境变量缺失配置；网络连通性&#x2F;防火墙调试</td>
+</tr>
+<tr>
+<td>Git 高级版本控制（Git &amp; VCS Ops）</td>
+<td>4</td>
+<td>复杂 Git 协同操作</td>
+<td>Merge Conflict 解决；Rebase&#x2F;Cherry-pick；Submodule 缺失修复</td>
+</tr>
+<tr>
+<td>系统配置与文件处理（CLI Data Processing）</td>
+<td>5</td>
+<td>Bash 工具链（awk&#x2F;sed&#x2F;jq&#x2F;find&#x2F;grep）</td>
+<td>JSON&#x2F;YAML 批量改写；大规模文件查找与清洗；数据库 Migration&#x2F;Seed 数据</td>
+</tr>
+<tr>
+<td>跨工具与部署自动化（Deploy &amp; Automation）</td>
+<td>4</td>
+<td>多命令串联成流水线</td>
+<td>一键部署脚本（Makefile&#x2F;Shell）；systemd&#x2F;nohup&#x2F;tmux 后台任务；Nginx 反向代理部署</td>
+</tr>
+</tbody></table>
+<p><strong>建议砍掉的内容</strong>：</p>
+<ol>
+<li><strong>CTF &#x2F; 网络安全破解类</strong>：指令弯弯绕绕（逆向、缓冲区溢出），非通用 Coding&#x2F;DevOps Agent 的核心场景</li>
+<li><strong>极端算法与数学计算任务</strong>：交给 HumanEval 这类代码生成基准去测，在 Terminal 测纯算法意义不大</li>
+<li><strong>主观性强、无确定性断言的任务</strong>：只留”最终 <code>verify.sh</code> 返回 0&#x2F;1”的硬指标</li>
+</ol>
+<p><strong>三条构建经验</strong>：</p>
+<ol>
+<li><strong>验证脚本一定要黑盒化</strong>：不要把测试逻辑写进 <code>instruction.md</code>；校验应直接检查<strong>系统状态</strong>（如 <code>nc -z localhost 8080</code>、<code>pytest</code> 返回码），而不是看 Agent 输出了什么</li>
+<li><strong>防止 Agent 破坏沙箱</strong>：限制交互轮数（建议单任务 30~50 轮）与单命令超时（如 60s），防止死循环卡死评测</li>
+<li><strong>保持基准版本稳定（Frozen Set）</strong>：选定的任务不要频繁改动，才能客观衡量迭代中 Prompt、Tool Call 和 Base Model 的能力变化</li>
+</ol>
+<hr>
+<h2 id="Q7：τ-bench（Sierra）呢？"><a href="#Q7：τ-bench（Sierra）呢？" class="headerlink" title="Q7：τ-bench（Sierra）呢？"></a>Q7：τ-bench（Sierra）呢？</h2><p><strong>答：它考的是”与真实用户多轮沟通 + 遵守业务规则 + 操作 API 完成业务任务”，主打企业级商用场景。</strong></p>
+<p>τ-bench（Tool-Agent-User Interaction Benchmark）由 Sierra 团队（Bret Taylor 与 Clay Bavor 创立的 AI 独角兽）推出。传统基准大多是”用户一次性给出长 Prompt，Agent 自己执行”，但在<strong>客服、售前、业务办理</strong>场景中会失效：</p>
+<ol>
+<li><strong>信息不完整</strong>：用户不会一次说完所有参数，Agent 必须<strong>多轮提问去收集</strong></li>
+<li><strong>业务规则限制（Policy）</strong>：如”未二次确认不得扣款”，Agent 必须严格遵守</li>
+<li><strong>用户行为随机</strong>：可能中途改主意、给错信息、表达模糊</li>
+</ol>
+<p><strong>核心架构</strong>：采用 POMDP 建模，三个角色——</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌────────────────┐           ┌─────────────────┐           ┌──────────────────┐</span><br><span class="line">│   User Sim     │ ◄──对话──► │   AI Agent      │ ◄──调用──► │  Environment     │</span><br><span class="line">│ (LLM 模拟用户)  │           │  (被测的大模型) │           │ (Mock API/数据库) │</span><br><span class="line">└────────────────┘           └─────────────────┘           └──────────────────┘</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>Environment</strong>：真实业务场景（τ-retail 电商、τ-airline 航空），预置数据表与工具 API（<code>cancel_order</code>、<code>rebook_flight</code>）</li>
+<li><strong>Policy Document</strong>：详细的业务规则文档</li>
+<li><strong>User Simulator</strong>：LLM 扮演用户，带着特定意图，但不主动说出条件，等 Agent 来问</li>
+</ul>
+<p><strong>评估指标</strong>：</p>
+<ul>
+<li><strong>状态判分法（Stateful Evaluation）</strong>：不看对话说得漂不漂亮，只看<strong>最终数据库状态</strong>是否与 Ground Truth 一致。允许对话过程有随机性，只要最终 API 决策正确</li>
+<li><strong>$pass^k$ 连续成功率</strong>：传统 $pass@k$ 是”k 次中有 1 次成功就算过”（衡量上限）；τ-bench 要求 <strong>k 次连续全部成功</strong>（k&#x3D;8）才算过（衡量可靠性）。企业部署无法容忍”试 8 次有一次能对”</li>
+</ul>
+<p><strong>演进版本</strong>：</p>
+<ul>
+<li><strong>τ²-bench</strong>：双控协作（Dual-Control），Agent 不能远程操作，必须指导用户在手机上实操并引导排查</li>
+<li><strong>τ³-bench</strong>：扩展到语音交互、知识库联动等更复杂场景</li>
+</ul>
+<hr>
+<h2 id="Q8：三个基准怎么选？"><a href="#Q8：三个基准怎么选？" class="headerlink" title="Q8：三个基准怎么选？"></a>Q8：三个基准怎么选？</h2><p><strong>答：看你的 Agent 是干什么的。</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">维度</th>
+<th align="left">SWE-bench Verified</th>
+<th align="left">Terminal-Bench 2.0</th>
+<th align="left">τ-bench (τ²&#x2F;τ³)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>主攻场景</strong></td>
+<td align="left">GitHub 仓库代码修改与 Bug 修复</td>
+<td align="left">Linux 终端系统配置、编译与运维</td>
+<td align="left">真实业务客服&#x2F;助理、多轮人机协同</td>
+</tr>
+<tr>
+<td align="left"><strong>关键考验</strong></td>
+<td align="left">长上下文代码理解与重构</td>
+<td align="left">多步骤命令行交互与报错调试</td>
+<td align="left">多轮信息搜集、Policy 遵守、API 操作</td>
+</tr>
+<tr>
+<td align="left"><strong>交互对象</strong></td>
+<td align="left">静态代码库（代码 Patch）</td>
+<td align="left">Linux Shell 交互环境</td>
+<td align="left">LLM 模拟用户 + 业务 API 数据库</td>
+</tr>
+<tr>
+<td align="left"><strong>判定标准</strong></td>
+<td align="left">pytest 单元测试全通过</td>
+<td align="left">外部隐藏测试脚本全通过</td>
+<td align="left">最终数据库状态断言</td>
+</tr>
+<tr>
+<td align="left"><strong>评价特色</strong></td>
+<td align="left">端到端代码解决率</td>
+<td align="left">系统多步链条鲁棒性</td>
+<td align="left">$pass^k$ 连续成功率（商用指标）</td>
+</tr>
+</tbody></table>
+<p><strong>选型建议</strong>：</p>
+<ul>
+<li>开发<strong>代码修复类 Agent</strong> → 参考 SWE-bench Verified 的思路（Patch + FAIL_TO_PASS&#x2F;PASS_TO_PASS）</li>
+<li>开发<strong>DevOps&#x2F;终端操作类 Agent</strong> → 参考 Terminal-Bench 2.0 的思路，按 Q6 的方案裁剪出 20~25 条快速评测集</li>
+<li>开发<strong>垂直领域业务智能体、Copilot 或多轮客服 Agent</strong> → 参考 τ-bench 的设计思路（<strong>规则 Policy + API 沙箱 + 模拟用户 + 数据库状态判定</strong>），这是目前工业界最值得参考的标准框架</li>
+</ul>
+<hr>
+<blockquote>
+<p>一句话总结：<strong>SWE-bench 考改代码，Terminal-Bench 考终端干活，τ-bench 考业务对话</strong>。评估基准不是越全越好，挑一个贴合你 Agent 场景的，先跑起来，再慢慢加任务。</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://LongLongMorty.github.io">LongMorty</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://longlongmorty.github.io/2026/08/06/Coding-Agent%E8%AF%84%E4%BC%B0%E5%9F%BA%E5%87%86%E8%AF%A6%E8%A7%A3/">https://longlongmorty.github.io/2026/08/06/Coding-Agent%E8%AF%84%E4%BC%B0%E5%9F%BA%E5%87%86%E8%AF%A6%E8%A7%A3/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://LongLongMorty.github.io" target="_blank">LongMorty</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/AI/">AI</a><a class="post-meta__tags" href="/tags/Agent/">Agent</a></div><div class="post-share"><div class="social-share" data-image="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260806235309345.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/07/19/%E5%A6%82%E4%BD%95%E5%86%99%E5%A5%BD-Skill%EF%BC%9A%E4%B8%80%E4%BB%BD%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C%E6%89%8B%E5%86%8C/" title="如何写好 Skill：一份实战经验手册"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260719211645152.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">如何写好 Skill：一份实战经验手册</div></div><div class="info-2"><div class="info-item-1"> 作者：jackjchou（腾讯技术工程） 本文示例以 Go 语言为主，兼顾 Python、Java 等语言，所有原则和技巧适用于任何编程语言。  阅读建议文章比较长，不同背景的读者可以按需跳读：    你的情况 推荐阅读路径    从没写过 Skill，想快速上手 一 → 二（重点看 2.5 Quick Start）→ 三 → 八   写过但效果不好，想提升质量 三 → 五 → 十二（反模...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/11/Understand-What-An-Agent-Is/" title="Understand What An Agent Is"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260611165812306.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-11</div><div class="info-item-2">Understand What An Agent Is</div></div><div class="info-2"><div class="info-item-1">Agent 学习笔记Stage 0: Understand What An Agent Is1. 区分 chatbot、workflow、agent、multi-agent这四个概念代表了大模型（LLM）应用落地中从简单到复杂、从被动到主动的演进路径。我们可以从核心定义、自主性、控制流等维度来彻底理清它们的区别。 Chatbot（聊天机器人） 核心特征： 纯粹的”一问一答”与状态保持。 如何...</div></div></div></a><a class="pagination-related" href="/2026/06/12/Go%E8%AF%AD%E8%A8%80-Deepseek-API%E5%81%9A%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8Fagent%E6%95%99%E5%AD%A6/" title="Go语言+Deepseek API做一个最小agent教学"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260612214914986.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-12</div><div class="info-item-2">Go语言+Deepseek API做一个最小agent教学</div></div><div class="info-2"><div class="info-item-1">Go语言+Deepseek API做一个最小agent教学打算用Go做一个最小 agent，可以选择工具、执行工具、返回最终答案，用到的库是github.com/sashabaranov/go-openai，模型是deepseek v4 flash。 1.简单的 LLM API首先我们来构建一个简单的 LLM API 完成普通对话，我采用的是OPENAI 的标准实现，刚好我最近在deepse...</div></div></div></a><a class="pagination-related" href="/2026/06/13/Learn-Tool-Use-RAG-And-Memory/" title="Learn Tool Use, RAG, And Memory"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260613173544233.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-13</div><div class="info-item-2">Learn Tool Use, RAG, And Memory</div></div><div class="info-2"><div class="info-item-1">Learn Tool Use, RAG, And Memory做检索增强生成：chunk、embed、retrieve、answer with citations检索增强生成（RAG, Retrieval-Augmented Generation）是目前工业界解决大模型“幻觉”和知识滞后的标准方案。简单来说，它就是给 LLM 配上了一个可搜索的“外挂大脑”。 我们可以将 RAG 拆解为两个阶...</div></div></div></a><a class="pagination-related" href="/2026/06/18/Plan-and-Solve%E6%A8%A1%E5%BC%8F/" title="Plan-and-Solve模式"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260618002207769.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-18</div><div class="info-item-2">Plan-and-Solve模式</div></div><div class="info-2"><div class="info-item-1">Plan-and-Solve模式在我们掌握了 ReAct 这种反应式的、步进决策的智能体范式后，接下来将探讨一种风格迥异但同样强大的方法，Plan-and-Solve。顾名思义，这种范式将任务处理明确地分为两个阶段：先规划 (Plan)，后执行 (Solve)。 如果说 ReAct 像一个经验丰富的侦探，根据现场的蛛丝马迹（Observation）一步步推理，随时调整自己的调查方向；那么 P...</div></div></div></a><a class="pagination-related" href="/2026/06/20/%E6%99%BA%E8%83%BD%E6%96%87%E4%BB%B6%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%B8%80%EF%BC%89%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E5%A4%84%E7%90%86/" title="智能文件问答系统（一）智能文档处理"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260620180956070.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-20</div><div class="info-item-2">智能文件问答系统（一）智能文档处理</div></div><div class="info-2"><div class="info-item-1">智能文件问答系统（一）智能文档处理让我们通过一个完整的实战案例，展示如何将记忆系统和RAG系统有机结合，构建一个智能文档问答助手。 背景在实际工作中，我们经常需要处理大量的技术文档、研究论文、产品手册等PDF文件。传统的文档阅读方式效率低下，难以快速定位关键信息，更无法建立知识间的关联。本案例将基于动手学大模型教程Happy-LLM的公测PDF文档Happy-LLM-0727.pdf为例，用...</div></div></div></a><a class="pagination-related" href="/2026/06/22/%E6%99%BA%E8%83%BD%E6%96%87%E4%BB%B6%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%EF%BC%88%E4%BA%8C%EF%BC%89Embedding%E3%80%81%E6%8C%81%E4%B9%85%E5%8C%96%E4%BB%A5%E5%8F%8Aretrieve/" title="智能文件问答系统（二）Embedding、持久化以及retrieve"><img class="cover" src="https://longlongmorty.oss-cn-beijing.aliyuncs.com/img/20260622154010740.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-22</div><div class="info-item-2">智能文件问答系统（二）Embedding、持久化以及retrieve</div></div><div class="info-2"><div class="info-item-1">智能文件问答系统（二）Embedding、持久化以及retrieve让我们通过一个完整的实战案例，展示如何将记忆系统和RAG系统有机结合，构建一个智能文档问答助手。 背景在实际工作中，我们经常需要处理大量的技术文档、研究论文、产品手册等PDF文件。传统的文档阅读方式效率低下，难以快速定位关键信息，更无法建立知识间的关联。本案例将基于动手学大模型教程Happy-LLM的公测PDF文档Happy...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Coding-Agent-%E8%AF%84%E4%BC%B0%E5%9F%BA%E5%87%86%E8%AF%A6%E8%A7%A3%EF%BC%9ASWE-bench%E3%80%81Terminal-Bench-%E4%B8%8E-%CF%84-bench"><span class="toc-text">Coding Agent 评估基准详解：SWE-bench、Terminal-Bench 与 τ-bench</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Q1%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%94%A8%E8%AF%84%E4%BC%B0%E5%9F%BA%E5%87%86%E6%9D%A5%E6%A3%80%E9%AA%8C-Coding-Agent%EF%BC%9F"><span class="toc-text">Q1：为什么要用评估基准来检验 Coding Agent？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Q2%EF%BC%9ASWE-bench-Verified-%E6%98%AF%E6%80%8E%E4%B9%88%E9%AA%8C%E8%AF%81%E7%9A%84%EF%BC%9F"><span class="toc-text">Q2：SWE-bench Verified 是怎么验证的？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Q3%EF%BC%9ASWE-bench-Verified-%E7%9A%84%E8%AF%84%E4%BC%B0%E6%8C%87%E6%A0%87%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-text">Q3：SWE-bench Verified 的评估指标是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Q4%EF%BC%9ATerminal-Bench-2-0-%E6%98%AF%E6%80%8E%E4%B9%88%E9%AA%8C%E8%AF%81%E7%9A%84%EF%BC%9F"><span class="toc-text">Q4：Terminal-Bench 2.0 是怎么验证的？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Q5%EF%BC%9ATerminal-Bench-2-0-%E7%9A%84%E8%AF%84%E4%BC%B0%E6%8C%87%E6%A0%87%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-text">Q5：Terminal-Bench 2.0 的评估指标是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Q6%EF%BC%9A%E6%83%B3%E4%B8%BA%E8%87%AA%E7%A0%94-Coding-Agent-%E8%AE%BE%E8%AE%A1%E7%B1%BB%E4%BC%BC-Terminal-Bench-%E7%9A%84%E7%B2%BE%E7%AE%80%E6%96%B9%E6%A1%88%EF%BC%8C%E5%A4%A7%E6%A6%82%E8%AE%BE%E8%AE%A1%E5%A4%9A%E5%B0%91%E6%9D%A1%E3%80%81%E4%BF%9D%E7%95%99%E5%93%AA%E4%BA%9B%EF%BC%9F"><span class="toc-text">Q6：想为自研 Coding Agent 设计类似 Terminal-Bench 的精简方案，大概设计多少条、保留哪些？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Q7%EF%BC%9A%CF%84-bench%EF%BC%88Sierra%EF%BC%89%E5%91%A2%EF%BC%9F"><span class="toc-text">Q7：τ-bench（Sierra）呢？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Q8%EF%BC%9A%E4%B8%89%E4%B8%AA%E5%9F%BA%E5%87%86%E6%80%8E%E4%B9%88%E9%80%89%EF%BC%9F"><span class="toc-text">Q8：三个基准怎么选？</span></a></li></ol></li></ol></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By LongMorty</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script src="/js/custom.js"></script><canvas class="fireworks" mobile="true"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      false
+        ? pjax.loadUrl('/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
